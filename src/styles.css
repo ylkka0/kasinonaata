@@ -1,0 +1,193 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --font-display: 'Bebas Neue', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.625rem;
+  /* Kasinonäätä palette */
+  --background: oklch(0.18 0.05 265);          /* #0d1a3a deep navy */
+  --surface: oklch(0.13 0.05 265);             /* #061029 darker card */
+  --surface-2: oklch(0.22 0.05 265);
+  --foreground: oklch(0.95 0.02 80);           /* cream #f5f0e8 */
+  --card: oklch(0.13 0.05 265);
+  --card-foreground: oklch(0.95 0.02 80);
+  --popover: oklch(0.13 0.05 265);
+  --popover-foreground: oklch(0.95 0.02 80);
+  --primary: oklch(0.78 0.13 85);              /* gold #c9a84c */
+  --primary-foreground: oklch(0.13 0.05 265);
+  --gold: oklch(0.78 0.13 85);
+  --gold-soft: oklch(0.85 0.10 85);
+  --secondary: oklch(0.22 0.05 265);
+  --secondary-foreground: oklch(0.95 0.02 80);
+  --muted: oklch(0.22 0.05 265);
+  --muted-foreground: oklch(0.72 0.02 80);
+  --accent: oklch(0.78 0.13 85);
+  --accent-foreground: oklch(0.13 0.05 265);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.98 0.02 80);
+  --success: oklch(0.72 0.18 145);
+  --warning: oklch(0.82 0.16 80);
+  --danger: oklch(0.65 0.22 25);
+  --border: oklch(0.78 0.13 85 / 0.25);
+  --input: oklch(0.22 0.05 265);
+  --ring: oklch(0.78 0.13 85);
+  --chart-1: oklch(0.78 0.13 85);
+  --chart-2: oklch(0.72 0.18 145);
+  --chart-3: oklch(0.62 0.22 25);
+  --chart-4: oklch(0.55 0.10 265);
+  --chart-5: oklch(0.85 0.10 85);
+}
+
+.dark { color-scheme: dark; }
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body { background-color: var(--color-background); color: var(--color-foreground); font-family: var(--font-body); }
+  h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); letter-spacing: 0.02em; }
+}
+
+@layer utilities {
+  .gold-border { border: 1px solid color-mix(in oklab, var(--gold) 50%, transparent); }
+
+  /* Yhtenäinen julkinen kontaineri: keskitetty, max-leveys, riittävä padding. */
+  .container {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1rem;
+    max-width: 1200px;
+  }
+  @media (min-width: 640px)  { .container { padding-inline: 1.5rem; } }
+  @media (min-width: 1024px) { .container { padding-inline: 2rem; max-width: 1200px; } }
+  @media (min-width: 1280px) { .container { max-width: 1240px; } }
+  @media (min-width: 1536px) { .container { max-width: 1280px; } }
+  .gold-glow { box-shadow: 0 0 24px -8px color-mix(in oklab, var(--gold) 60%, transparent); }
+  .gradient-gold { background: linear-gradient(135deg, var(--gold), var(--gold-soft)); }
+  .text-gold { color: var(--gold); }
+  .bg-surface { background-color: var(--surface); }
+  .bg-surface-2 { background-color: var(--surface-2); }
+
+  .suit-divider {
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+    color: var(--gold); font-size: 1.25rem; opacity: 0.6;
+  }
+  .suit-divider::before, .suit-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--gold) 40%, transparent), transparent);
+  }
+
+  @keyframes top3-slide-in {
+    0% { opacity: 0; transform: translateX(40px) scale(.94); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes top3-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes top3-pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 45%, transparent), 0 0 24px -8px color-mix(in oklab, var(--gold) 60%, transparent); }
+    50% { box-shadow: 0 0 0 6px color-mix(in oklab, var(--gold) 0%, transparent), 0 0 36px -4px color-mix(in oklab, var(--gold) 80%, transparent); }
+  }
+  @keyframes top3-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  @keyframes top3-rank-pop {
+    0% { transform: scale(.4) rotate(-20deg); opacity: 0; }
+    70% { transform: scale(1.25) rotate(8deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  @keyframes top3-crown-bob {
+    0%, 100% { transform: translateY(0) rotate(-8deg); }
+    50% { transform: translateY(-3px) rotate(8deg); }
+  }
+  @keyframes top3-sheen {
+    0% { transform: translateX(-120%) skewX(-20deg); }
+    100% { transform: translateX(220%) skewX(-20deg); }
+  }
+  .top3-card {
+    animation: top3-slide-in 700ms cubic-bezier(.2,.8,.2,1) both,
+               top3-float 5s ease-in-out infinite 900ms;
+    transition: transform .3s ease, box-shadow .3s ease;
+    will-change: transform;
+  }
+  .top3-card-1 { animation-delay: 80ms, 900ms; z-index: 3; }
+  .top3-card-2 { animation-delay: 220ms, 1100ms; z-index: 2; }
+  .top3-card-3 { animation-delay: 360ms, 1300ms; z-index: 1; }
+  .top3-card:hover { transform: translateY(-4px) scale(1.02); z-index: 5; }
+  .top3-rank { animation: top3-rank-pop 700ms cubic-bezier(.2,1.6,.3,1) both; }
+  .top3-card-1 .top3-rank { animation-delay: 500ms; }
+  .top3-card-2 .top3-rank { animation-delay: 640ms; }
+  .top3-card-3 .top3-rank { animation-delay: 780ms; }
+  .top3-crown { animation: top3-crown-bob 2.6s ease-in-out infinite; transform-origin: center bottom; }
+  .top3-shimmer {
+    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--gold) 35%, transparent), transparent);
+    background-size: 200% 100%;
+    animation: top3-shimmer 2.4s linear infinite;
+  }
+  .top3-cta-pulse { animation: top3-pulse-glow 2.2s ease-in-out infinite; }
+}
+
+/* CMS-rendered HTML content */
+.cms-html h1 { font-size: 2.5rem; margin: 1.5rem 0 1rem; }
+.cms-html h2 { font-size: 2rem; margin: 1.5rem 0 0.75rem; color: var(--gold); }
+.cms-html h3 { font-size: 1.5rem; margin: 1.25rem 0 0.5rem; color: var(--gold); }
+.cms-html h4 { font-size: 1.2rem; margin: 1rem 0 0.5rem; }
+.cms-html p { margin: 0.75rem 0; line-height: 1.7; }
+.cms-html ul, .cms-html ol { margin: 0.75rem 0; padding-left: 1.5rem; line-height: 1.7; }
+.cms-html ul { list-style: disc; }
+.cms-html ol { list-style: decimal; }
+.cms-html li { margin: 0.25rem 0; }
+.cms-html a { color: var(--gold); text-decoration: underline; }
+.cms-html a:hover { opacity: 0.85; }
+.cms-html blockquote { border-left: 3px solid var(--gold); padding-left: 1rem; margin: 1rem 0; color: var(--muted-foreground); font-style: italic; }
+.cms-html img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0; }
+.cms-html strong { color: var(--foreground); font-weight: 700; }
+.cms-html code { background: var(--surface-2); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.9em; }
+
+/* Casino ticker marquee */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker-scroll 50s linear infinite;
+  width: max-content;
+}
+.ticker-track:hover { animation-play-state: paused; }

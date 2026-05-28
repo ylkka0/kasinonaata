@@ -1,0 +1,24 @@
+UPDATE public.pages SET content = $$
+<h2>Maksutavat nettikasinoilla</h2>
+<p>Yleisimmät ja luotettavimmat maksutavat suomalaisilla nettikasinoilla. Alta löydät kunkin maksutavan esittelyn ja tärkeimmät tiedot.</p>
+
+<h2 id="trustly">Trustly</h2>
+<p>Trustly maksutapa oli yksi ensimmäisiä palveluita mullistamassa nettikasinomaailmaa vuonna 2016 kun he toivat markkinoille pay n play -mallin, mikä mahdollisti asiakkaiden rekisteröitymisen talletuksen yhteydessä. Tästä tuli välittömästi suuri hitti, ja vuonna 2022 jo yli 200 kasinoa oli ottanut Trustly maksutavan käyttöön.</p>
+<p>Pay n play loi uuden pikakasino-trendin, mistä tuli varsinkin suomalaisten keskuudessa todella suuri hitti sen nopeuden, luotettavuuden sekä helppouden vuoksi. Talletus onnistuu näppärästi käyttäen kaikkia suomalaisia verkkopankkitunnuksia, kuten Nordean, S-Pankin, Osuuspankin, Danske Bankin tai vaikkapa Aktian pankkitunnuksia. Verkkopankkitunnuksia käyttäen nettikasino saa myös pelaajan tiedot suoraan pankilta ja sitä kautta rekisteröitymistä ei vaadita pelaajalta, vaan se tapahtuu automaattisesti.</p>
+<p>Vielä tänä päivänäkin pikakasinot ovat suosituimpia suomalaisten pelaajien keskuudessa, ja tähän ei varmasti ole tulossa lähiaikoina muutosta. Mikäli Trustly maksutapa on mitä etsit nettikasinolta, niin tältä sivulta löydät kaiken tarpeellisen — oli se sitten Trustly-kasinoiden bonuksia, nostoaikoja tai mahdollisia kuluja mitä siirroista tulee.</p>
+
+<h2 id="zimpler">Zimpler</h2>
+<p>Zimpler on ruotsalainen maksutapa, joka alunperin tarjosi nettikasinoille mobiilimaksuja, mutta on muuttanut toimintaansa lähivuosina ja heidän kauttaan onnistuu nykyään pankkitalletukset suomalaisilla kasinoilla. Tämä tarkoittaa myös sitä, että Zimpler-talletuksen yhteydessä pelitili luodaan automaattisesti pelaajan puolesta, ja pelaaminen voi alkaa välittömästi.</p>
+<p>Zimpler perustettiin vuonna 2012 alunperin eri nimellä keskittyen mobiilimaksuihin, ja vuonna 2016 he alkoivat tarjoamaan verkkolompakkomaksuja — silloin myös syntyi nimi Zimpler. Vuonna 2017 Zimpler sai maksulaitosluvan Ruotsin Finanssivalvonnalta, mikä vahvisti sen asemaa virallisena maksupalveluntarjoajana. Tästä johtuen Zimpler on yksi turvallisimmista maksupalveluista mitä nettikasinoilta löytyy suomalaisille edelleen tänäpäivänä.</p>
+<p>Vuonna 2025 Zimpler laajensi toimintaansa Brasiliaan ja sai sertifioinnin brasilialaiselta keskuspankilta toimimaan Open Finance -ekosysteemissä. Yksi Zimplerin uusimmista ominaisuuksista on Zimpler ID+, identiteettilayer, joka yhdistää biometrisen tunnistautumisen ja sääntelytarkastukset jo käyttäjän ensimmäisessä vuorovaikutuksessa. Zimplerillä on toimipisteitä Ruotsissa, Maltalla sekä Brasiliassa.</p>
+
+<h2 id="viljo">Viljo</h2>
+<p>Viljo maksutapa on uusi kilpailija Suomen markkinoilla, joka tarjoaa rekisteröinnin talletuksen yhteydessä. Kuten nimestä voi päätellä, tämä on täysin suomalainen maksutapa ja uskomme, että Viljo maksutavasta tulee yksi suosituimmista lähitulevaisuudessa.</p>
+<p>Viljo tarjoaa vaivattoman ja turvallisen tavan nauttia rahapeleistä netissä. Tämä uusi maksupalvelu on suunniteltu erityisesti pikakasinoille, ja se mullistaa tavan jolla teemme rahansiirtoja. Viljo kasinot tarjoavat modernin pelikokemuksen, jossa yhdistyvät nopeus ja helppokäyttöisyys.</p>
+<p>Viljo maksutapa mahdollistaa välittömät talletukset ja mikä parasta, myös todella nopeat rahansiirrot voittojen kotiutuksessa. Kun napukaija kaakattaa, saat voitot pankkitilillesi usein minuuteissa. Turvallisuus on myös huippuluokkaa, sillä Viljo käyttää pankkien vahvaa tunnistautumista ja edistynyttä salaustekniikkaa, joten tietosi ja rahasi ovat aina turvassa.</p>
+
+<h2 id="trumo">Trumo</h2>
+<p>Trumo maksutapa on uusi täysin kotimainen maksupalvelu, joka tulee nopeasti saavuttamaan suosiota nettikasinoiden maailmassa. Se tarjoaa pelaajille erittäin nopean, turvallisen ja helpon tavan siirtää rahaa. Trumo kasinot ovat moderneja pikakasinoita, joissa pelaamisen aloittaminen on tehty mahdollisimman vaivattomaksi.</p>
+<p>Yksi Trumo maksutavan suurimmista eduista on sen toiminta Pay N Play -periaatteella. Tämä tarkoittaa, että sinun ei tarvitse luoda erillistä pelitiliä, vaan nettikasino saa pelaajan tiedot talletuksen yhteydessä pankilta, mistä talletus tehdään, ja tätä kautta pelitili luodaan automaattisesti. Tunnistautuminen tapahtuu suoraan talletuksen yhteydessä suomalaisilla verkkopankkitunnuksilla.</p>
+<p>Trumo mahdollistaa välittömät talletukset ja takaa myös todella nopeat rahansiirrot. Usein rahat näkyvät pankkitililläsi vain minuuteissa. Koska Trumo on suomalaisen finanssivalvonnan alainen toimija, se takaa että Trumo maksupalvelu on yksi turvallisimmista tavoista siirtää rahaa suomalaisille.</p>
+$$, updated_at = now() WHERE slug = 'maksutavat';

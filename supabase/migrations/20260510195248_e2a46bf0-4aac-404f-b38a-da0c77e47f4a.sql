@@ -1,0 +1,1 @@
+UPDATE public.site_settings SET value = value - 'logo_sub' WHERE key = 'header';
