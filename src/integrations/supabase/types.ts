@@ -112,6 +112,78 @@ export type Database = {
           },
         ]
       }
+      casino_reviews: {
+        Row: {
+          cons: string[]
+          created_at: string
+          display_order: number
+          extras: Json
+          games: string
+          id: string
+          license: string
+          license_flag: string
+          license_group: string
+          license_tax_note: string | null
+          logo_url: string | null
+          name: string
+          payment_methods: string
+          pros: string[]
+          published: boolean
+          slug: string
+          support: string
+          title: string
+          updated_at: string
+          welcome_bonus: string
+          withdrawals: string
+        }
+        Insert: {
+          cons?: string[]
+          created_at?: string
+          display_order?: number
+          extras?: Json
+          games?: string
+          id?: string
+          license?: string
+          license_flag?: string
+          license_group?: string
+          license_tax_note?: string | null
+          logo_url?: string | null
+          name: string
+          payment_methods?: string
+          pros?: string[]
+          published?: boolean
+          slug: string
+          support?: string
+          title: string
+          updated_at?: string
+          welcome_bonus?: string
+          withdrawals?: string
+        }
+        Update: {
+          cons?: string[]
+          created_at?: string
+          display_order?: number
+          extras?: Json
+          games?: string
+          id?: string
+          license?: string
+          license_flag?: string
+          license_group?: string
+          license_tax_note?: string | null
+          logo_url?: string | null
+          name?: string
+          payment_methods?: string
+          pros?: string[]
+          published?: boolean
+          slug?: string
+          support?: string
+          title?: string
+          updated_at?: string
+          welcome_bonus?: string
+          withdrawals?: string
+        }
+        Relationships: []
+      }
       casinos: {
         Row: {
           affiliate_link: string | null

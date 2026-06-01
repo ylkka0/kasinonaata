@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
 import { CasinoCard } from "@/components/CasinoCard";
+import { CmsExtra } from "@/components/CmsExtra";
 
 export const Route = createFileRoute("/kasinot")({
   head: () => ({
@@ -36,6 +37,7 @@ function Page() {
           {casinos.map((c, i) => <CasinoCard key={c.id} casino={c} rank={i + 1} />)}
         </div>
       </section>
+      <CmsExtra slug="kasinot" />
     </Layout>
   );
 }

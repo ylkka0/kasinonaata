@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +10,7 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { SortableList } from "@/components/admin/SortableList";
 import { StringListInput } from "@/components/admin/StringListInput";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { fetchCasinoLogo } from "@/lib/casino-logos.functions";
 
 export const Route = createFileRoute("/admin")({ component: Admin });
 
@@ -183,7 +185,7 @@ function Admin() {
   return <AdminDash />;
 }
 
-type Tab = "home" | "casinos" | "blog" | "pages" | "settings" | "users";
+type Tab = "home" | "casinos" | "reviews" | "blog" | "pages" | "settings" | "users";
 
 function AdminDash() {
   const [tab, setTab] = useState<Tab>("home");
@@ -204,6 +206,7 @@ function AdminDash() {
             [
               { id: "home", label: "Etusivu" },
               { id: "casinos", label: "Kasinot" },
+              { id: "reviews", label: "Arvostelut" },
               { id: "blog", label: "Blogi" },
               { id: "pages", label: "Sivut & sisältö" },
               { id: "settings", label: "Asetukset" },
@@ -225,6 +228,7 @@ function AdminDash() {
         </div>
         {tab === "home" && <HomePanel />}
         {tab === "casinos" && <CasinosPanel />}
+        {tab === "reviews" && <ReviewsPanel />}
         {tab === "blog" && <BlogPanel />}
         {tab === "pages" && <PagesPanel />}
         {tab === "settings" && <SettingsPanel />}
@@ -736,7 +740,22 @@ function UsersPanel() {
   const call = async <T = any,>(body: Record<string, unknown>): Promise<T> => {
     const { data, error } = await supabase.functions.invoke("admin-users", { body });
     if (error) {
-      const msg = (data as any)?.error || error.message || "Virhe";
+      let msg = (data as any)?.error || error.message || "Virhe";
+      // supabase-js wraps non-2xx in FunctionsHttpError; read the actual response body
+      const ctx = (error as any)?.context;
+      if (ctx && typeof ctx.json === "function") {
+        try {
+          const body = await ctx.json();
+          if (body?.error) msg = body.error;
+        } catch {
+          try {
+            const txt = await ctx.text();
+            if (txt) msg = txt;
+          } catch {
+            /* ignore */
+          }
+        }
+      }
       throw new Error(msg);
     }
     if (data && (data as any).error) throw new Error((data as any).error);
@@ -792,6 +811,21 @@ function UsersPanel() {
       refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Poisto epäonnistui");
+    }
+  };
+
+  const handleSetPassword = async (id: string, mail: string) => {
+    const password = window.prompt(`Anna uusi salasana käyttäjälle ${mail} (vähintään 8 merkkiä):`);
+    if (password === null) return;
+    if (password.length < 8) {
+      toast.error("Salasanan tulee olla vähintään 8 merkkiä");
+      return;
+    }
+    try {
+      await call({ action: "setPassword", userId: id, password });
+      toast.success(`Salasana päivitetty käyttäjälle ${mail}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Salasanan vaihto epäonnistui");
     }
   };
 
@@ -875,6 +909,12 @@ function UsersPanel() {
                   {u.isAdmin ? "Poista admin" : "Tee adminiksi"}
                 </button>
               )}
+              <button
+                className="text-xs text-gold underline"
+                onClick={() => handleSetPassword(u.id, u.email)}
+              >
+                Aseta salasana
+              </button>
               {u.id !== user?.id && (
                 <button
                   className="text-xs text-[color:var(--danger)] underline"
@@ -904,12 +944,56 @@ function PagesPanel() {
   const [newPage, setNewPage] = useState({ slug: "", title: "" });
 
   const PAGE_GROUPS: { label: string; slugs: string[] }[] = [
-    { label: "Päävalikko", slugs: ["etusivu", "uutiset", "arvostelut", "maksutavat", "lisenssit", "oppaat", "toimitus"] },
+    { label: "Päävalikko", slugs: ["etusivu", "kasinot", "uutiset", "arvostelut", "maksutavat", "lisenssit", "oppaat", "toimitus"] },
     { label: "Uutiset – alasivut", slugs: ["uutiset-uudet-kasinot", "uutiset-alan-paivitykset"] },
     { label: "Arvostelut – alasivut", slugs: ["pikakasinot", "kotiutusnopeus"] },
     { label: "Oppaat – alasivut", slugs: ["bonukset", "kolikkopelit"] },
+    { label: "Blogi & Kirjoittajat", slugs: ["blogi", "kirjoittajat"] },
     { label: "Muut sivut", slugs: ["valitukset"] },
   ];
+
+  const SLUG_TITLES: Record<string, string> = {
+    etusivu: "Etusivu",
+    kasinot: "Kasinot",
+    uutiset: "Uutiset",
+    arvostelut: "Arvostelut",
+    maksutavat: "Maksutavat",
+    lisenssit: "Lisenssit",
+    oppaat: "Oppaat",
+    toimitus: "Toimitus",
+    "uutiset-uudet-kasinot": "Uudet kasinot",
+    "uutiset-alan-paivitykset": "Alan päivitykset",
+    pikakasinot: "Pikakasinot",
+    kotiutusnopeus: "Kotiutusnopeus",
+    bonukset: "Bonukset",
+    kolikkopelit: "Kolikkopelit",
+    blogi: "Blogi",
+    kirjoittajat: "Kirjoittajat",
+    valitukset: "Valitukset",
+  };
+
+  const ROUTE_FOR_SLUG: Record<string, string> = {
+    etusivu: "/",
+    "uutiset-uudet-kasinot": "/uutiset/uudet-kasinot",
+    "uutiset-alan-paivitykset": "/uutiset/alan-paivitykset",
+  };
+
+  const openOrCreate = async (slug: string) => {
+    const existing = pages.find((p: any) => p.slug === slug);
+    if (existing) {
+      setEditing(existing);
+      return;
+    }
+    const title = SLUG_TITLES[slug] ?? slug;
+    const { data, error } = await supabase
+      .from("pages")
+      .insert({ slug, title, content: "" })
+      .select()
+      .single();
+    if (error) return toast.error(error.message);
+    await qc.invalidateQueries({ queryKey: ["admin-pages"] });
+    setEditing(data);
+  };
 
   const createPage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1058,29 +1142,42 @@ function PagesPanel() {
         </form>
       )}
 
-      {PAGE_GROUPS.map((group) => {
-        const groupPages = pages.filter((p: any) => group.slugs.includes(p.slug));
-        if (groupPages.length === 0) return null;
-        return (
-          <div key={group.label} className="mb-5">
-            <h3 className="text-xs uppercase tracking-widest text-gold mb-2">{group.label}</h3>
-            <div className="space-y-2">
-              {groupPages.map((p: any) => (
-                <div key={p.id} className="bg-surface gold-border rounded p-3 flex items-center justify-between gap-3 flex-wrap">
+      {PAGE_GROUPS.map((group) => (
+        <div key={group.label} className="mb-5">
+          <h3 className="text-xs uppercase tracking-widest text-gold mb-2">{group.label}</h3>
+          <div className="space-y-2">
+            {group.slugs.map((slug) => {
+              const p = pages.find((x: any) => x.slug === slug);
+              const title = p?.title ?? SLUG_TITLES[slug] ?? slug;
+              const route = ROUTE_FOR_SLUG[slug] ?? `/${slug}`;
+              return (
+                <div key={slug} className="bg-surface gold-border rounded p-3 flex items-center justify-between gap-3 flex-wrap">
                   <div>
-                    <div className="font-bold">{p.title}</div>
-                    <div className="text-xs text-muted-foreground">/{p.slug}</div>
+                    <div className="font-bold">
+                      {title}
+                      {!p && (
+                        <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                          (ei vielä CMS-sisältöä)
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{route}</div>
                   </div>
                   <div className="flex gap-3">
-                    <a href={`/${p.slug === "etusivu" ? "" : p.slug}`} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground underline">Avaa</a>
-                    <button onClick={() => setEditing(p)} className="text-sm text-gold underline">Muokkaa</button>
+                    <a href={route} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground underline">Avaa</a>
+                    <button onClick={() => openOrCreate(slug)} className="text-sm text-gold underline">
+                      {p ? "Muokkaa" : "Luo & muokkaa"}
+                    </button>
+                    {p && (
+                      <button onClick={() => removePage(p.id, p.slug)} className="text-sm text-[color:var(--danger)] underline">Poista</button>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        );
-      })}
+        </div>
+      ))}
 
       {(() => {
         const knownSlugs = new Set(PAGE_GROUPS.flatMap((g) => g.slugs));
@@ -1436,6 +1533,352 @@ function SettingsPanel() {
           Tallenna footer
         </button>
       </div>
+      <ChangePasswordCard />
     </div>
+  );
+}
+
+function ChangePasswordCard() {
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 8) return toast.error("Salasanan pitää olla vähintään 8 merkkiä.");
+    if (password !== confirm) return toast.error("Salasanat eivät täsmää.");
+    setSubmitting(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setSubmitting(false);
+    if (error) {
+      const msg = error.message || "Salasanan vaihto epäonnistui";
+      if (/different|same.*password/i.test(msg)) return toast.error("Uuden salasanan pitää erota vanhasta.");
+      if (/weak|short|characters|HIBP|pwned/i.test(msg)) return toast.error("Salasana on liian heikko. Käytä pidempää ja vahvempaa salasanaa.");
+      return toast.error(msg);
+    }
+    toast.success("Salasana vaihdettu.");
+    setPassword("");
+    setConfirm("");
+  };
+
+  return (
+    <div className="bg-surface gold-border rounded-xl p-5 space-y-3">
+      <h3 className="font-display text-2xl">Vaihda salasana</h3>
+      <p className="text-sm text-muted-foreground">
+        Aseta uusi salasana admin-tilillesi. Olet jo kirjautunut, joten vanhaa salasanaa ei tarvita.
+      </p>
+      <form onSubmit={submit} className="space-y-3 max-w-sm">
+        <input
+          type="password"
+          required
+          minLength={8}
+          placeholder="Uusi salasana (väh. 8 merkkiä)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+        />
+        <input
+          type="password"
+          required
+          minLength={8}
+          placeholder="Vahvista uusi salasana"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          className="w-full bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+        />
+        <button
+          disabled={submitting}
+          className="px-4 py-2 gradient-gold text-background font-bold uppercase rounded disabled:opacity-60"
+        >
+          {submitting ? "Hetki..." : "Tallenna uusi salasana"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+const REVIEW_GROUPS: { id: string; label: string; flag: string }[] = [
+  { id: "mga", label: "MGA", flag: "🇲🇹" },
+  { id: "emta", label: "EMTA", flag: "🇪🇪" },
+  { id: "curacao", label: "Curaçao", flag: "🇨🇼" },
+  { id: "anjouan", label: "Anjouan", flag: "🏝️" },
+];
+
+type ReviewExtra = { title: string; content: string };
+type ReviewForm = {
+  slug: string;
+  name: string;
+  title: string;
+  license: string;
+  license_flag: string;
+  license_tax_note: string;
+  license_group: string;
+  payment_methods: string;
+  welcome_bonus: string;
+  games: string;
+  withdrawals: string;
+  support: string;
+  logo_url: string | null;
+  extras: ReviewExtra[];
+  pros: string[];
+  cons: string[];
+  display_order: number;
+  published: boolean;
+};
+
+const emptyReview: ReviewForm = {
+  slug: "",
+  name: "",
+  title: "",
+  license: "",
+  license_flag: "🇲🇹",
+  license_tax_note: "",
+  license_group: "mga",
+  payment_methods: "",
+  welcome_bonus: "",
+  games: "",
+  withdrawals: "",
+  support: "",
+  logo_url: null,
+  extras: [],
+  pros: [],
+  cons: [],
+  display_order: 100,
+  published: true,
+};
+
+function ReviewsPanel() {
+  const qc = useQueryClient();
+  const { data: rows = [] } = useQuery({
+    queryKey: ["admin-reviews"],
+    queryFn: async () =>
+      (await supabase.from("casino_reviews").select("*").order("license_group").order("display_order")).data ?? [],
+  });
+  const [form, setForm] = useState<ReviewForm>(emptyReview);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [filterGroup, setFilterGroup] = useState<string>("all");
+  const [fetchingLogos, setFetchingLogos] = useState(false);
+  const fetchLogo = useServerFn(fetchCasinoLogo);
+
+  const fetchOneLogo = async (id: string, name: string) => {
+    try {
+      const { logo_url } = await fetchLogo({ data: { name } });
+      if (!logo_url) return toast.error(`Ei löytynyt: ${name}`);
+      const { error } = await supabase.from("casino_reviews").update({ logo_url }).eq("id", id);
+      if (error) throw error;
+      toast.success(`Logo päivitetty: ${name}`);
+      qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+      qc.invalidateQueries({ queryKey: ["reviews-list"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Virhe");
+    }
+  };
+
+  const fetchAllMissingLogos = async () => {
+    const missing = rows.filter((r) => !r.logo_url);
+    if (missing.length === 0) return toast.info("Kaikilla arvosteluilla on jo logo");
+    if (!confirm(`Haetaan logot ${missing.length} arvostelulle netistä. Jatketaanko?`)) return;
+    setFetchingLogos(true);
+    let ok = 0;
+    let fail = 0;
+    for (const r of missing) {
+      try {
+        const { logo_url } = await fetchLogo({ data: { name: r.name } });
+        if (logo_url) {
+          await supabase.from("casino_reviews").update({ logo_url }).eq("id", r.id);
+          ok++;
+        } else fail++;
+      } catch {
+        fail++;
+      }
+    }
+    setFetchingLogos(false);
+    toast.success(`Valmis: ${ok} päivitetty, ${fail} epäonnistui`);
+    qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+    qc.invalidateQueries({ queryKey: ["reviews-list"] });
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = {
+      ...form,
+      license_tax_note: form.license_tax_note || null,
+      extras: form.extras,
+    };
+    const { error } = editing
+      ? await supabase.from("casino_reviews").update(payload).eq("id", editing)
+      : await supabase.from("casino_reviews").insert(payload);
+    if (error) return toast.error(error.message);
+    toast.success("Tallennettu");
+    setForm(emptyReview);
+    setEditing(null);
+    qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+    qc.invalidateQueries({ queryKey: ["reviews-list"] });
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Poistetaanko arvostelu?")) return;
+    const { error } = await supabase.from("casino_reviews").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Poistettu");
+    qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+    qc.invalidateQueries({ queryKey: ["reviews-list"] });
+  };
+
+  const togglePublished = async (id: string, published: boolean) => {
+    await supabase.from("casino_reviews").update({ published: !published }).eq("id", id);
+    qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+    qc.invalidateQueries({ queryKey: ["reviews-list"] });
+  };
+
+  const startEdit = (r: typeof rows[number]) => {
+    setEditing(r.id);
+    setForm({
+      slug: r.slug,
+      name: r.name,
+      title: r.title,
+      license: r.license ?? "",
+      license_flag: r.license_flag ?? "",
+      license_tax_note: r.license_tax_note ?? "",
+      license_group: r.license_group ?? "mga",
+      payment_methods: r.payment_methods ?? "",
+      welcome_bonus: r.welcome_bonus ?? "",
+      games: r.games ?? "",
+      withdrawals: r.withdrawals ?? "",
+      support: r.support ?? "",
+      logo_url: r.logo_url ?? null,
+      extras: (Array.isArray(r.extras) ? r.extras : []) as ReviewExtra[],
+      pros: r.pros ?? [],
+      cons: r.cons ?? [],
+      display_order: r.display_order ?? 100,
+      published: r.published ?? true,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const filtered = filterGroup === "all" ? rows : rows.filter((r) => r.license_group === filterGroup);
+
+  const setExtra = (i: number, patch: Partial<ReviewExtra>) => {
+    const next = form.extras.slice();
+    next[i] = { ...next[i], ...patch };
+    setForm({ ...form, extras: next });
+  };
+
+  return (
+    <>
+      <form onSubmit={save} className="bg-surface gold-border rounded-xl p-5 grid md:grid-cols-2 gap-3 mb-8">
+        <h2 className="md:col-span-2 font-display text-2xl text-gold">
+          {editing ? `Muokkaa arvostelua: ${form.name}` : "Lisää uusi arvostelu"}
+        </h2>
+
+        <div className="md:col-span-2">
+          <ImageUpload
+            bucket="casino-logos"
+            value={form.logo_url}
+            onChange={(url) => setForm({ ...form, logo_url: url })}
+            label="Kasinon logo"
+          />
+        </div>
+
+        <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Nimi" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Slug (esim. pelikaani)" required value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+        <input className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Otsikko (sivulla näkyvä H1)" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+
+        <select className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" value={form.license_group} onChange={(e) => setForm({ ...form, license_group: e.target.value })}>
+          {REVIEW_GROUPS.map((g) => (<option key={g.id} value={g.id}>{g.flag} {g.label}</option>))}
+        </select>
+        <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Lisenssin lippu (esim. 🇲🇹)" value={form.license_flag} onChange={(e) => setForm({ ...form, license_flag: e.target.value })} />
+        <input className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Lisenssin teksti" value={form.license} onChange={(e) => setForm({ ...form, license: e.target.value })} />
+        <input className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Lisenssin verohuomautus (valinnainen)" value={form.license_tax_note} onChange={(e) => setForm({ ...form, license_tax_note: e.target.value })} />
+
+        <textarea rows={2} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Maksutavat" value={form.payment_methods} onChange={(e) => setForm({ ...form, payment_methods: e.target.value })} />
+        <textarea rows={3} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Tervetuliaisbonus" value={form.welcome_bonus} onChange={(e) => setForm({ ...form, welcome_bonus: e.target.value })} />
+        <textarea rows={2} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Pelivalikoima" value={form.games} onChange={(e) => setForm({ ...form, games: e.target.value })} />
+        <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Kotiutukset" value={form.withdrawals} onChange={(e) => setForm({ ...form, withdrawals: e.target.value })} />
+        <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Asiakaspalvelu" value={form.support} onChange={(e) => setForm({ ...form, support: e.target.value })} />
+
+        <div className="md:col-span-2 bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="font-bold text-sm uppercase text-gold">Lisäosiot (extras)</div>
+            <button type="button" onClick={() => setForm({ ...form, extras: [...form.extras, { title: "", content: "" }] })} className="text-xs px-2 py-1 border border-[color:var(--gold)]/40 rounded">+ Lisää osio</button>
+          </div>
+          {form.extras.map((ex, i) => (
+            <div key={i} className="grid md:grid-cols-[1fr_2fr_auto] gap-2">
+              <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Otsikko" value={ex.title} onChange={(e) => setExtra(i, { title: e.target.value })} />
+              <textarea rows={2} className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Sisältö" value={ex.content} onChange={(e) => setExtra(i, { content: e.target.value })} />
+              <button type="button" onClick={() => setForm({ ...form, extras: form.extras.filter((_, j) => j !== i) })} className="text-xs text-[color:var(--danger)] underline">Poista</button>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
+          <StringListInput label="Plussat" value={form.pros} onChange={(pros) => setForm({ ...form, pros })} placeholder="Esim. Nopeat kotiutukset" accentClass="text-[color:var(--success)]" />
+        </div>
+        <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
+          <StringListInput label="Miinukset" value={form.cons} onChange={(cons) => setForm({ ...form, cons })} placeholder="Esim. Suppea pelivalikoima" accentClass="text-[color:var(--danger)]" />
+        </div>
+
+        <input type="number" className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Järjestys" value={form.display_order} onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })} />
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} />
+          Julkaistu (näkyy sivustolla)
+        </label>
+
+        <div className="md:col-span-2 flex gap-2">
+          <button className="flex-1 px-4 py-2.5 gradient-gold text-background font-bold uppercase rounded">{editing ? "Päivitä" : "Lisää arvostelu"}</button>
+          {editing && (
+            <button type="button" onClick={() => { setEditing(null); setForm(emptyReview); }} className="px-4 py-2.5 border border-[color:var(--gold)]/40 rounded text-sm uppercase">Peruuta</button>
+          )}
+        </div>
+      </form>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button onClick={() => setFilterGroup("all")} className={`text-xs px-3 py-1.5 rounded-full border ${filterGroup === "all" ? "bg-[color:var(--gold)] text-background border-[color:var(--gold)]" : "border-[color:var(--gold)]/40 text-gold"}`}>Kaikki ({rows.length})</button>
+        {REVIEW_GROUPS.map((g) => {
+          const n = rows.filter((r) => r.license_group === g.id).length;
+          return (
+            <button key={g.id} onClick={() => setFilterGroup(g.id)} className={`text-xs px-3 py-1.5 rounded-full border ${filterGroup === g.id ? "bg-[color:var(--gold)] text-background border-[color:var(--gold)]" : "border-[color:var(--gold)]/40 text-gold"}`}>{g.flag} {g.label} ({n})</button>
+          );
+        })}
+        <button
+          onClick={fetchAllMissingLogos}
+          disabled={fetchingLogos}
+          className="ml-auto text-xs px-3 py-1.5 rounded-full border border-[color:var(--gold)] bg-[color:var(--gold)]/10 text-gold disabled:opacity-50"
+        >
+          {fetchingLogos ? "Haetaan…" : "🔎 Hae puuttuvat logot netistä"}
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        {filtered.map((r) => (
+          <div key={r.id} className="bg-surface gold-border rounded p-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-12 h-12 rounded bg-background/60 border border-[color:var(--gold)]/20 p-1 flex items-center justify-center shrink-0">
+                {r.logo_url ? (
+                  <img src={r.logo_url} alt="" className="max-w-full max-h-full object-contain" />
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">Ei logoa</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="font-bold truncate">
+                  {r.license_flag} {r.name}{" "}
+                  {!r.published && <span className="text-[10px] text-muted-foreground ml-1">(luonnos)</span>}
+                </div>
+                <div className="text-muted-foreground text-xs truncate">/{r.slug} · {r.license_group}</div>
+              </div>
+            </div>
+            <div className="flex gap-3 shrink-0 text-xs">
+              <a href={`/arvostelut/${r.slug}`} className="text-gold underline" target="_blank" rel="noreferrer">Avaa</a>
+              <button onClick={() => fetchOneLogo(r.id, r.name)} className="text-gold underline">Hae logo</button>
+              <button onClick={() => togglePublished(r.id, r.published)} className="text-gold underline">{r.published ? "Piilota" : "Julkaise"}</button>
+              <button onClick={() => startEdit(r)} className="text-gold underline">Muokkaa</button>
+              <button onClick={() => remove(r.id)} className="text-[color:var(--danger)] underline">Poista</button>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && <p className="text-sm text-muted-foreground">Ei arvosteluja tällä suodattimella.</p>}
+      </div>
+    </>
   );
 }

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
+import { CmsExtra } from "@/components/CmsExtra";
 
 export const Route = createFileRoute("/blogi")({
   head: () => ({
@@ -61,6 +62,7 @@ function BlogList() {
           ))}
         </div>
       </section>
+      <CmsExtra slug="blogi" />
     </Layout>
   );
 }

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
+import { CmsExtra } from "@/components/CmsExtra";
 import jiriPhoto from "@/assets/jiri-kaartinen.png";
 
 export const Route = createFileRoute("/kirjoittajat")({
@@ -191,6 +192,7 @@ function KirjoittajatPage() {
           </div>
         </article>
       </section>
+      <CmsExtra slug="kirjoittajat" />
     </Layout>
   );
 }

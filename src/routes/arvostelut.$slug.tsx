@@ -1,26 +1,34 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
-import { REVIEWS } from "@/lib/casino-reviews";
+
+type Extra = { title: string; content: string };
+type Review = {
+  slug: string;
+  name: string;
+  title: string;
+  license: string;
+  license_flag: string;
+  license_tax_note: string | null;
+  payment_methods: string;
+  welcome_bonus: string;
+  games: string;
+  withdrawals: string;
+  support: string;
+  logo_url: string | null;
+  extras: Extra[];
+  pros: string[];
+  cons: string[];
+};
 
 export const Route = createFileRoute("/arvostelut/$slug")({
-  head: ({ params }) => {
-    const r = REVIEWS[params.slug];
-    return {
-      meta: [
-        { title: r ? `${r.title} – Kasinonäätä` : "Arvostelu – Kasinonäätä" },
-        {
-          name: "description",
-          content: r
-            ? `Näädän kattava arvostelu kasinosta ${r.name}: bonukset, maksutavat, kotiutukset ja kokemukset.`
-            : "Kasinoarvostelu.",
-        },
-      ],
-    };
-  },
-  loader: ({ params }) => {
-    if (!REVIEWS[params.slug]) throw notFound();
-    return null;
-  },
+  head: ({ params }) => ({
+    meta: [
+      { title: `${params.slug} – Kasinonäätä` },
+      { name: "description", content: "Näädän kasinoarvostelu." },
+    ],
+  }),
   notFoundComponent: () => (
     <Layout>
       <div className="container mx-auto px-4 py-20 text-center">
@@ -36,8 +44,37 @@ export const Route = createFileRoute("/arvostelut/$slug")({
 
 function ReviewPage() {
   const { slug } = Route.useParams();
-  const r = REVIEWS[slug];
-  if (!r) return null;
+  const { data: r, isLoading } = useQuery({
+    queryKey: ["review", slug],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("casino_reviews")
+        .select("*")
+        .eq("slug", slug)
+        .eq("published", true)
+        .maybeSingle();
+      return data as unknown as Review | null;
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Ladataan...</div>
+      </Layout>
+    );
+  }
+
+  if (!r) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <h1 className="font-display text-3xl mb-2">Arvostelua ei löytynyt</h1>
+          <a href="/arvostelut" className="text-gold hover:underline">← Takaisin arvosteluihin</a>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -53,26 +90,33 @@ function ReviewPage() {
           / {r.name}
         </nav>
 
-        <header className="mb-8">
-          <div className="text-xs uppercase tracking-widest text-gold mb-2">
-            {r.licenseFlag} {r.license}
+        <header className="mb-8 flex flex-col md:flex-row md:items-center gap-6">
+          {r.logo_url && (
+            <div className="w-32 h-32 shrink-0 bg-surface gold-border rounded-xl p-3 flex items-center justify-center">
+              <img src={r.logo_url} alt={`${r.name} logo`} className="max-w-full max-h-full object-contain" />
+            </div>
+          )}
+          <div>
+            <div className="text-xs uppercase tracking-widest text-gold mb-2">
+              {r.license_flag} {r.license}
+            </div>
+            <h1 className="font-display text-4xl md:text-5xl leading-tight">
+              {r.title}
+            </h1>
           </div>
-          <h1 className="font-display text-4xl md:text-5xl leading-tight">
-            {r.title}
-          </h1>
         </header>
 
         <section className="grid md:grid-cols-2 gap-4 mb-8">
-          <FactCard label="Lisenssi" value={`${r.licenseFlag} ${r.license}`} />
-          <FactCard label="Maksutavat" value={r.paymentMethods} />
+          <FactCard label="Lisenssi" value={`${r.license_flag} ${r.license}`} />
+          <FactCard label="Maksutavat" value={r.payment_methods} />
           <FactCard label="Kotiutukset" value={r.withdrawals} />
           <FactCard label="Asiakaspalvelu" value={r.support} />
         </section>
 
-        <Block title="🎁 Tervetuliaisbonus">{r.welcomeBonus}</Block>
+        <Block title="🎁 Tervetuliaisbonus">{r.welcome_bonus}</Block>
         <Block title="🎰 Pelivalikoima">{r.games}</Block>
 
-        {r.extras?.map((e) => (
+        {(r.extras ?? []).map((e) => (
           <Block key={e.title} title={e.title}>
             {e.content}
           </Block>
@@ -101,9 +145,9 @@ function ReviewPage() {
           </div>
         </div>
 
-        {r.licenseTaxNote && (
+        {r.license_tax_note && (
           <p className="mt-6 text-xs text-muted-foreground italic border-l-2 border-[color:var(--gold)]/40 pl-3">
-            {r.licenseTaxNote}
+            {r.license_tax_note}
           </p>
         )}
 

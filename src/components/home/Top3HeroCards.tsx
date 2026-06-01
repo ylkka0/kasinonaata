@@ -24,7 +24,7 @@ export function Top3HeroCards() {
       <div className="mb-3 text-[11px] uppercase tracking-[0.25em] text-gold/80">
         <span className="inline-flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--success)] animate-pulse" />
-          {CURRENT_YEAR} {CURRENT_MONTH.toUpperCase()}N PARHAAT
+          UUDET KASINOT {CURRENT_YEAR} {CURRENT_MONTH.toUpperCase()}
         </span>
       </div>
 

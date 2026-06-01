@@ -122,6 +122,19 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    if (action === "setPassword") {
+      const userId = String(body.userId ?? "");
+      const password = String(body.password ?? "");
+      if (!userId) return json({ error: "Missing userId" }, 400);
+      if (password.length < 8) return json({ error: "Salasanan tulee olla vähintään 8 merkkiä" }, 400);
+      const { error } = await admin.auth.admin.updateUserById(userId, {
+        password,
+        email_confirm: true,
+      });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Server error" }, 500);
