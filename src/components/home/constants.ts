@@ -3,8 +3,9 @@ export const MONTHS_FI = [
   "Heinäkuu","Elokuu","Syyskuu","Lokakuu","Marraskuu","Joulukuu",
 ] as const;
 
-export const CURRENT_MONTH = MONTHS_FI[4];
-export const CURRENT_YEAR = 2026;
+const _NOW = new Date();
+export const CURRENT_MONTH = MONTHS_FI[_NOW.getMonth()];
+export const CURRENT_YEAR = _NOW.getFullYear();
 export const UPDATED_DATE_SHORT = "10.5.2026";
 export const UPDATED_DATE_LONG = "10. toukokuuta 2026";
 

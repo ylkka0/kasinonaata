@@ -26,7 +26,7 @@ export function NewsFeedSection() {
       <div className="flex items-end justify-between gap-4 border-b border-[color:var(--gold)]/20 pb-3 mb-8">
         <div>
           <div className="text-xs uppercase tracking-widest text-gold mb-1">Näädän toimitus</div>
-          <h2 className="font-display text-3xl md:text-4xl">Uusimmat kasinouutiset</h2>
+          <h2 className="font-display text-3xl md:text-4xl">Uusimmat uutiset</h2>
         </div>
         <Link
           to="/blogi"

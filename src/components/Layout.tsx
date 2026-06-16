@@ -1,6 +1,7 @@
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { AffiliateDisclosure } from "./AffiliateDisclosure";
+import { FaqSection } from "./FaqSection";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <Header />
       <AffiliateDisclosure />
       <main className="flex-1">{children}</main>
+      <FaqSection />
       <Footer />
     </div>
   );

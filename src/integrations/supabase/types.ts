@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      authors: {
+        Row: {
+          content: string
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          photo_url: string | null
+          published: boolean
+          role: string | null
+          slug: string
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name: string
+          photo_url?: string | null
+          published?: boolean
+          role?: string | null
+          slug: string
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          photo_url?: string | null
+          published?: boolean
+          role?: string | null
+          slug?: string
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author: string
@@ -309,6 +351,39 @@ export type Database = {
           issue_type?: Database["public"]["Enums"]["complaint_issue"]
           resolution_notes?: string | null
           status?: Database["public"]["Enums"]["complaint_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          display_order: number
+          id: string
+          page_key: string
+          published: boolean
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          page_key: string
+          published?: boolean
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          page_key?: string
+          published?: boolean
+          question?: string
           updated_at?: string
         }
         Relationships: []

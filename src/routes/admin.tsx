@@ -11,6 +11,7 @@ import { SortableList } from "@/components/admin/SortableList";
 import { StringListInput } from "@/components/admin/StringListInput";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { fetchCasinoLogo } from "@/lib/casino-logos.functions";
+import { FaqsPanel } from "@/components/admin/FaqsPanel";
 
 export const Route = createFileRoute("/admin")({ component: Admin });
 
@@ -20,6 +21,16 @@ function Admin() {
   const [password, setPassword] = useState("");
   const mode = "login" as const;
   const [submitting, setSubmitting] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem("admin_remember_email");
+    if (saved) {
+      setEmail(saved);
+      setRememberMe(true);
+    }
+  }, []);
 
   useEffect(() => {
     const completeAuthLink = async () => {
@@ -98,6 +109,11 @@ function Admin() {
           : error.message,
       );
     } else {
+      if (rememberMe) {
+        window.localStorage.setItem("admin_remember_email", email);
+      } else {
+        window.localStorage.removeItem("admin_remember_email");
+      }
       toast.success("Tervetuloa");
     }
   };
@@ -142,6 +158,15 @@ function Admin() {
             >
               {submitting ? "Hetki..." : "Kirjaudu"}
             </button>
+            <label className="flex items-center gap-2 text-xs text-muted-foreground select-none cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="accent-[color:var(--gold)]"
+              />
+              Muista minut (tallenna sähköposti tähän selaimeen)
+            </label>
             <button
               type="button"
               disabled={submitting}
@@ -185,10 +210,60 @@ function Admin() {
   return <AdminDash />;
 }
 
-type Tab = "home" | "casinos" | "reviews" | "blog" | "pages" | "settings" | "users";
+type Tab =
+  | "dashboard"
+  | "home"
+  | "blog"
+  | "pages"
+  | "faqs"
+  | "casinos"
+  | "reviews"
+  | "authors"
+  | "users"
+  | "settings";
+
+type Category = {
+  id: string;
+  label: string;
+  tabs: { id: Tab; label: string }[];
+};
+
+const CATEGORIES: Category[] = [
+  { id: "overview", label: "Yleiskatsaus", tabs: [{ id: "dashboard", label: "Yleiskatsaus" }] },
+  {
+    id: "content",
+    label: "Sisältö",
+    tabs: [
+      { id: "home", label: "Etusivu" },
+      { id: "blog", label: "Blogi & uutiset" },
+      { id: "pages", label: "Sivut" },
+      { id: "faqs", label: "UKK" },
+    ],
+  },
+  {
+    id: "casinos",
+    label: "Kasinot",
+    tabs: [
+      { id: "casinos", label: "Kasinot" },
+      { id: "reviews", label: "Arvostelut" },
+    ],
+  },
+  {
+    id: "people",
+    label: "Käyttäjät",
+    tabs: [
+      { id: "authors", label: "Kirjoittajat" },
+      { id: "users", label: "Käyttäjät" },
+    ],
+  },
+  { id: "settings", label: "Asetukset", tabs: [{ id: "settings", label: "Asetukset" }] },
+];
 
 function AdminDash() {
-  const [tab, setTab] = useState<Tab>("home");
+  const [tab, setTab] = useState<Tab>("dashboard");
+  const activeCategory =
+    CATEGORIES.find((c) => c.tabs.some((t) => t.id === tab)) ?? CATEGORIES[0];
+
   return (
     <Layout>
       <section className="container mx-auto px-4 py-10">
@@ -201,40 +276,114 @@ function AdminDash() {
             Kirjaudu ulos
           </button>
         </div>
-        <div className="flex gap-2 mb-8 border-b border-[color:var(--gold)]/20">
-          {(
-            [
-              { id: "home", label: "Etusivu" },
-              { id: "casinos", label: "Kasinot" },
-              { id: "reviews", label: "Arvostelut" },
-              { id: "blog", label: "Blogi" },
-              { id: "pages", label: "Sivut & sisältö" },
-              { id: "settings", label: "Asetukset" },
-              { id: "users", label: "Käyttäjät" },
-            ] as const
-          ).map((t) => (
+
+        {/* Categories */}
+        <div className="flex flex-wrap gap-2 mb-3 border-b border-[color:var(--gold)]/20">
+          {CATEGORIES.map((c) => (
             <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
+              key={c.id}
+              onClick={() => setTab(c.tabs[0].id)}
               className={`px-5 py-2.5 font-semibold uppercase tracking-wider text-sm border-b-2 -mb-px ${
-                tab === t.id
+                activeCategory.id === c.id
                   ? "border-[color:var(--gold)] text-gold"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              {t.label}
+              {c.label}
             </button>
           ))}
         </div>
+
+        {/* Sub-tabs (only when category has more than one) */}
+        {activeCategory.tabs.length > 1 && (
+          <div className="flex flex-wrap gap-2 mb-8">
+            {activeCategory.tabs.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`px-4 py-1.5 rounded-full text-sm border transition ${
+                  tab === t.id
+                    ? "border-[color:var(--gold)] bg-[color:var(--gold)]/10 text-gold"
+                    : "border-[color:var(--gold)]/20 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {activeCategory.tabs.length === 1 && <div className="mb-8" />}
+
+        {tab === "dashboard" && <DashboardPanel onNavigate={setTab} />}
         {tab === "home" && <HomePanel />}
         {tab === "casinos" && <CasinosPanel />}
         {tab === "reviews" && <ReviewsPanel />}
         {tab === "blog" && <BlogPanel />}
+        {tab === "authors" && <AuthorsPanel />}
         {tab === "pages" && <PagesPanel />}
+        {tab === "faqs" && <FaqsPanel />}
         {tab === "settings" && <SettingsPanel />}
         {tab === "users" && <UsersPanel />}
       </section>
     </Layout>
+  );
+}
+
+function DashboardPanel({ onNavigate }: { onNavigate: (t: Tab) => void }) {
+  const { data: stats } = useQuery({
+    queryKey: ["admin-dashboard-stats"],
+    queryFn: async () => {
+      const [casinos, reviews, blog, authors, faqs] = await Promise.all([
+        supabase.from("casinos").select("id", { count: "exact", head: true }),
+        supabase.from("casino_reviews").select("id", { count: "exact", head: true }),
+        supabase.from("blog_posts").select("id", { count: "exact", head: true }),
+        supabase.from("authors").select("id", { count: "exact", head: true }),
+        supabase.from("faqs").select("id", { count: "exact", head: true }),
+      ]);
+      return {
+        casinos: casinos.count ?? 0,
+        reviews: reviews.count ?? 0,
+        blog: blog.count ?? 0,
+        authors: authors.count ?? 0,
+        faqs: faqs.count ?? 0,
+      };
+    },
+  });
+
+  const cards: { label: string; count?: number; tab: Tab; desc: string }[] = [
+    { label: "Arvostelut", count: stats?.reviews, tab: "reviews", desc: "Lisää, muokkaa ja poista kasinoarvosteluja." },
+    { label: "Blogi & uutiset", count: stats?.blog, tab: "blog", desc: "Kirjoita uutisia ja artikkeleita." },
+    { label: "Etusivu", tab: "home", desc: "Päivitä hero, top3 ja etusivun sisältö." },
+    { label: "Sivut", tab: "pages", desc: "Staattisten sivujen sisältö." },
+    { label: "UKK", count: stats?.faqs, tab: "faqs", desc: "Usein kysytyt kysymykset." },
+    { label: "Kasinot", count: stats?.casinos, tab: "casinos", desc: "Kasinotietokanta." },
+    { label: "Kirjoittajat", count: stats?.authors, tab: "authors", desc: "Sivuston kirjoittajat." },
+    { label: "Asetukset", tab: "settings", desc: "Ylätunniste, alatunniste ja yleisasetukset." },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <p className="text-muted-foreground">
+        Tervetuloa hallintaan. Valitse alla mitä haluat muokata.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {cards.map((c) => (
+          <button
+            key={c.tab}
+            onClick={() => onNavigate(c.tab)}
+            className="text-left p-5 rounded-lg border border-[color:var(--gold)]/20 hover:border-[color:var(--gold)]/60 hover:bg-[color:var(--gold)]/5 transition"
+          >
+            <div className="flex items-baseline justify-between mb-2">
+              <h3 className="font-display text-xl text-gold">{c.label}</h3>
+              {typeof c.count === "number" && (
+                <span className="text-2xl font-bold tabular-nums">{c.count}</span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">{c.desc}</p>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -1879,6 +2028,210 @@ function ReviewsPanel() {
         ))}
         {filtered.length === 0 && <p className="text-sm text-muted-foreground">Ei arvosteluja tällä suodattimella.</p>}
       </div>
+    </>
+  );
+}
+
+function AuthorsPanel() {
+  const qc = useQueryClient();
+  const { data: authors = [] } = useQuery({
+    queryKey: ["admin-authors"],
+    queryFn: async () =>
+      (
+        await supabase
+          .from("authors")
+          .select("*")
+          .order("display_order", { ascending: true })
+          .order("created_at", { ascending: false })
+      ).data ?? [],
+  });
+
+  const empty = {
+    name: "",
+    slug: "",
+    role: "",
+    tagline: "",
+    photo_url: null as string | null,
+    content: "",
+    display_order: 100,
+    published: true,
+  };
+  const [form, setForm] = useState(empty);
+  const [editing, setEditing] = useState<string | null>(null);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = { ...form };
+    const { error } = editing
+      ? await supabase.from("authors").update(payload).eq("id", editing)
+      : await supabase.from("authors").insert(payload);
+    if (error) return toast.error(error.message);
+    toast.success("Tallennettu");
+    setForm(empty);
+    setEditing(null);
+    qc.invalidateQueries({ queryKey: ["admin-authors"] });
+    qc.invalidateQueries({ queryKey: ["authors"] });
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Poistetaanko kirjoittaja?")) return;
+    const { error } = await supabase.from("authors").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Poistettu");
+    qc.invalidateQueries({ queryKey: ["admin-authors"] });
+    qc.invalidateQueries({ queryKey: ["authors"] });
+  };
+
+  const persistOrder = async (next: typeof authors) => {
+    qc.setQueryData(["admin-authors"], next);
+    await Promise.all(
+      next.map((a, idx) =>
+        supabase.from("authors").update({ display_order: idx + 1 }).eq("id", a.id),
+      ),
+    );
+    qc.invalidateQueries({ queryKey: ["admin-authors"] });
+    qc.invalidateQueries({ queryKey: ["authors"] });
+    toast.success("Järjestys tallennettu");
+  };
+
+  return (
+    <>
+      <form
+        onSubmit={save}
+        className="bg-surface gold-border rounded-xl p-5 grid md:grid-cols-2 gap-3 mb-8"
+      >
+        <h2 className="md:col-span-2 font-display text-2xl text-gold">
+          {editing ? "Muokkaa kirjoittajaa" : "Uusi kirjoittaja"}
+        </h2>
+        <div className="md:col-span-2">
+          <ImageUpload
+            bucket="blog-images"
+            value={form.photo_url}
+            onChange={(url) => setForm({ ...form, photo_url: url })}
+            label="Profiilikuva"
+            folder="authors"
+          />
+        </div>
+        <input
+          className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+          placeholder="Nimi"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          required
+        />
+        <input
+          className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+          placeholder="Slug (url-osa)"
+          value={form.slug}
+          onChange={(e) => setForm({ ...form, slug: e.target.value })}
+          required
+        />
+        <input
+          className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+          placeholder="Rooli (esim. iGaming-asiantuntija · Päätoimittaja)"
+          value={form.role}
+          onChange={(e) => setForm({ ...form, role: e.target.value })}
+        />
+        <textarea
+          className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+          rows={2}
+          placeholder="Lyhyt esittely (näkyy nimen alla)"
+          value={form.tagline}
+          onChange={(e) => setForm({ ...form, tagline: e.target.value })}
+        />
+        <div className="md:col-span-2">
+          <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">
+            Esittelyteksti
+          </label>
+          <RichTextEditor
+            value={form.content}
+            onChange={(html) => setForm((f) => ({ ...f, content: html }))}
+          />
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={form.published}
+            onChange={(e) => setForm({ ...form, published: e.target.checked })}
+          />
+          Julkaise (näkyy sivustolla)
+        </label>
+        <div className="md:col-span-2 flex gap-2">
+          <button className="flex-1 px-4 py-2.5 gradient-gold text-background font-bold uppercase rounded">
+            {editing ? "Päivitä" : "Tallenna"}
+          </button>
+          {editing && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(null);
+                setForm(empty);
+              }}
+              className="px-4 py-2.5 border border-[color:var(--gold)]/40 rounded text-sm uppercase"
+            >
+              Peruuta
+            </button>
+          )}
+        </div>
+      </form>
+
+      <p className="text-xs text-muted-foreground mb-2">
+        Vedä kirjoittajia järjestääksesi ne Kirjoittajat-sivulla.
+      </p>
+      <SortableList
+        items={authors}
+        onReorder={persistOrder}
+        renderItem={(a) => (
+          <div className="bg-surface gold-border rounded p-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              {a.photo_url && (
+                <img src={a.photo_url} alt="" className="w-12 h-12 rounded-full object-cover" />
+              )}
+              <div className="min-w-0">
+                <div className="font-bold truncate">{a.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {a.published ? (
+                    <span className="text-[color:var(--success)]">● Julkaistu</span>
+                  ) : (
+                    <span>● Luonnos</span>
+                  )}{" "}
+                  · /{a.slug}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button
+                className="text-xs text-gold underline"
+                onClick={() => {
+                  setEditing(a.id);
+                  setForm({
+                    name: a.name,
+                    slug: a.slug,
+                    role: a.role ?? "",
+                    tagline: a.tagline ?? "",
+                    photo_url: a.photo_url,
+                    content: a.content ?? "",
+                    display_order: a.display_order ?? 100,
+                    published: a.published,
+                  });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              >
+                Muokkaa
+              </button>
+              <button
+                className="text-xs text-[color:var(--danger)] underline"
+                onClick={() => remove(a.id)}
+              >
+                Poista
+              </button>
+            </div>
+          </div>
+        )}
+      />
+      {authors.length === 0 && (
+        <p className="text-sm text-muted-foreground py-6 text-center">Ei vielä kirjoittajia.</p>
+      )}
     </>
   );
 }
