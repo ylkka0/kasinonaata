@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { pick, type Lang } from "@/lib/i18n";
 
 export type PageRecord = {
   id: string;
@@ -8,6 +9,10 @@ export type PageRecord = {
   meta_title: string | null;
   meta_description: string | null;
   content: string;
+  title_en?: string | null;
+  meta_title_en?: string | null;
+  meta_description_en?: string | null;
+  content_en?: string | null;
   updated_at: string;
 };
 
@@ -63,6 +68,18 @@ export function pageHead(
       { property: "og:title", content: title },
       { property: "og:description", content: desc },
     ],
+  };
+}
+
+/** Resolve language-aware fields from a PageRecord. */
+export function localizedPage(p: PageRecord | null | undefined, lang: Lang) {
+  if (!p) return p;
+  return {
+    ...p,
+    title: pick(lang, p.title, p.title_en),
+    meta_title: pick(lang, p.meta_title, p.meta_title_en),
+    meta_description: pick(lang, p.meta_description, p.meta_description_en),
+    content: pick(lang, p.content, p.content_en) ?? "",
   };
 }
 

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
 import { CmsExtra } from "@/components/CmsExtra";
+import { pick, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/blogi")({
   head: () => ({
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/blogi")({
 });
 
 function BlogList() {
+  const { lang } = useLang();
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["blog-posts"],
     queryFn: async () => {
@@ -54,9 +56,11 @@ function BlogList() {
                 {p.tags && p.tags.length > 0 && (
                   <div className="text-[11px] uppercase tracking-wider text-gold mb-2">{p.tags[0]}</div>
                 )}
-                <h2 className="font-display text-2xl group-hover:text-gold mb-2 leading-tight">{p.title}</h2>
-                {p.excerpt && <p className="text-sm text-muted-foreground line-clamp-3">{p.excerpt}</p>}
-                <div className="text-xs text-muted-foreground mt-3">{p.author} · {p.published_at && new Date(p.published_at).toLocaleDateString("fi-FI")}</div>
+                <h2 className="font-display text-2xl group-hover:text-gold mb-2 leading-tight">{pick(lang, p.title, (p as any).title_en)}</h2>
+                {(p.excerpt || (p as any).excerpt_en) && (
+                  <p className="text-sm text-muted-foreground line-clamp-3">{pick(lang, p.excerpt, (p as any).excerpt_en)}</p>
+                )}
+                <div className="text-xs text-muted-foreground mt-3">{p.author} · {p.published_at && new Date(p.published_at).toLocaleDateString(lang === "en" ? "en-GB" : "fi-FI")}</div>
               </div>
             </Link>
           ))}

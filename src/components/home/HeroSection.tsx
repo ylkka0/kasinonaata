@@ -1,29 +1,42 @@
 import { Link } from "@tanstack/react-router";
 import { Top3HeroCards } from "./Top3HeroCards";
+import heroFox from "@/assets/hero-fox.png.asset.json";
+import { useT } from "@/lib/i18n";
 
 /**
- * Etusivun yläosa: vasemmalla uutismainen teaser, keskellä iso näätä-maskotti.
- * Kaikki vanha otsikko/CTA-sisältö on poistettu.
+ * Etusivun yläosa: taustalla "Casino Uutiset" -näätä.
+ * Vasemmalla uutismainen teaser ja oikealla kärkipaikan kortit.
  */
 export function HeroSection() {
+  const t = useT();
   return (
-    <section className="relative overflow-hidden border-b border-[color:var(--gold)]/20 bg-[#0D1B3E]">
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_50%,rgba(212,175,55,0.25),transparent_60%)] pointer-events-none" />
+    <section
+      className="relative overflow-hidden border-b border-[color:var(--gold)]/20 bg-[#0D1B3E]"
+      style={{
+        backgroundImage: `url(${heroFox.url})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center 25%",
+      }}
+    >
+      {/* Tummennus vasemmalta oikealle, jotta teksti erottuu */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0D1B3E]/95 via-[#0D1B3E]/75 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B3E]/80 via-transparent to-[#0D1B3E]/40 pointer-events-none" />
 
-      <div className="container mx-auto px-4 py-8 md:py-16 relative">
-        <div className="grid lg:grid-cols-[1fr_minmax(0,460px)] gap-8 md:gap-10 items-center">
+      <div className="container mx-auto px-4 py-10 md:py-20 relative">
+        <div className="grid lg:grid-cols-[1fr_minmax(0,380px)] gap-8 md:gap-12 items-center">
           <div className="max-w-xl">
             <h1 className="font-display text-3xl md:text-5xl leading-[1.05] text-white">
-              Kasinouutiset — <span className="text-gold">aina ajan tasalla</span>
+              {t("hero.kicker")} <span className="text-gold">{t("hero.headline")}</span>
             </h1>
-            <p className="mt-5 text-base md:text-lg text-foreground/85">
-              Kasinonäätä seuraa nettikasinoiden maailmaa kellon ympäri.
-              Uudet kasinot, bonusmuutokset, lisenssipäivitykset —
-              saat kaiken täältä ensimmäisenä.
+            <p className="mt-5 text-base md:text-lg text-white/85">
+              {t("hero.lede")}
             </p>
             <div className="mt-6">
-              <Link to="/blogi" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-[color:var(--gold)]/40 text-gold font-semibold uppercase tracking-wider text-sm hover:bg-surface bg-[#0D1B3E]/70">
-                Lue uutiset →
+              <Link
+                to="/blogi"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-[color:var(--gold)]/40 text-gold font-semibold uppercase tracking-wider text-sm hover:bg-surface bg-[#0D1B3E]/70 backdrop-blur-sm"
+              >
+                {t("hero.cta")}
               </Link>
             </div>
           </div>

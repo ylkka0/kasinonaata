@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import logo from "@/assets/marten-logo.png";
 import { useSiteSetting, DEFAULT_HEADER, type HeaderSettings } from "@/lib/cms";
+import { useLang, useT } from "@/lib/i18n";
 
 export function Header() {
   const settings = useSiteSetting<HeaderSettings>("header", DEFAULT_HEADER);
@@ -10,6 +11,8 @@ export function Header() {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const { lang, setLang } = useLang();
+  const t = useT();
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
@@ -76,17 +79,47 @@ export function Header() {
             )
           )}
         </nav>
-        <button
-          className="lg:hidden p-2 text-gold"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Avaa valikko"
-        >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0 border border-[color:var(--gold)]/30 rounded-md overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setLang("fi")}
+              aria-pressed={lang === "fi"}
+              aria-label={t("lang.fi")}
+              className={`px-2 py-1 text-[11px] font-bold tracking-wider ${lang === "fi" ? "bg-[color:var(--gold)] text-background" : "text-foreground/80 hover:text-gold"}`}
+            >FI</button>
+            <button
+              type="button"
+              onClick={() => setLang("en")}
+              aria-pressed={lang === "en"}
+              aria-label={t("lang.en")}
+              className={`px-2 py-1 text-[11px] font-bold tracking-wider ${lang === "en" ? "bg-[color:var(--gold)] text-background" : "text-foreground/80 hover:text-gold"}`}
+            >EN</button>
+          </div>
+          <button
+            className="lg:hidden p-2 text-gold"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={t("menu.open")}
+          >
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
       {mobileOpen && (
         <div className="lg:hidden border-t border-[color:var(--gold)]/20 bg-background/95">
           <div className="container mx-auto px-4 py-4 space-y-2 max-h-[80vh] overflow-y-auto">
+            <div className="flex gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => setLang("fi")}
+                className={`flex-1 px-2 py-1 text-[11px] font-bold tracking-wider rounded border ${lang === "fi" ? "bg-[color:var(--gold)] text-background border-[color:var(--gold)]" : "border-[color:var(--gold)]/30 text-foreground/80"}`}
+              >FI · Suomeksi</button>
+              <button
+                type="button"
+                onClick={() => setLang("en")}
+                className={`flex-1 px-2 py-1 text-[11px] font-bold tracking-wider rounded border ${lang === "en" ? "bg-[color:var(--gold)] text-background border-[color:var(--gold)]" : "border-[color:var(--gold)]/30 text-foreground/80"}`}
+              >EN · English</button>
+            </div>
             {groups.map((g) => (
               <div key={g.label}>
                 {g.items ? (

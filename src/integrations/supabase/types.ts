@@ -17,6 +17,7 @@ export type Database = {
       authors: {
         Row: {
           content: string
+          content_en: string | null
           created_at: string
           display_order: number
           id: string
@@ -24,12 +25,15 @@ export type Database = {
           photo_url: string | null
           published: boolean
           role: string | null
+          role_en: string | null
           slug: string
           tagline: string | null
+          tagline_en: string | null
           updated_at: string
         }
         Insert: {
           content?: string
+          content_en?: string | null
           created_at?: string
           display_order?: number
           id?: string
@@ -37,12 +41,15 @@ export type Database = {
           photo_url?: string | null
           published?: boolean
           role?: string | null
+          role_en?: string | null
           slug: string
           tagline?: string | null
+          tagline_en?: string | null
           updated_at?: string
         }
         Update: {
           content?: string
+          content_en?: string | null
           created_at?: string
           display_order?: number
           id?: string
@@ -50,8 +57,10 @@ export type Database = {
           photo_url?: string | null
           published?: boolean
           role?: string | null
+          role_en?: string | null
           slug?: string
           tagline?: string | null
+          tagline_en?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -60,55 +69,73 @@ export type Database = {
         Row: {
           author: string
           content: string
+          content_en: string | null
           cover_image_alt: string | null
+          cover_image_alt_en: string | null
           cover_image_url: string | null
           created_at: string
           display_order: number
           excerpt: string | null
+          excerpt_en: string | null
           id: string
           meta_description: string | null
+          meta_description_en: string | null
           meta_title: string | null
+          meta_title_en: string | null
           published: boolean
           published_at: string | null
           slug: string
           tags: string[]
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
           author?: string
           content?: string
+          content_en?: string | null
           cover_image_alt?: string | null
+          cover_image_alt_en?: string | null
           cover_image_url?: string | null
           created_at?: string
           display_order?: number
           excerpt?: string | null
+          excerpt_en?: string | null
           id?: string
           meta_description?: string | null
+          meta_description_en?: string | null
           meta_title?: string | null
+          meta_title_en?: string | null
           published?: boolean
           published_at?: string | null
           slug: string
           tags?: string[]
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
           author?: string
           content?: string
+          content_en?: string | null
           cover_image_alt?: string | null
+          cover_image_alt_en?: string | null
           cover_image_url?: string | null
           created_at?: string
           display_order?: number
           excerpt?: string | null
+          excerpt_en?: string | null
           id?: string
           meta_description?: string | null
+          meta_description_en?: string | null
           meta_title?: string | null
+          meta_title_en?: string | null
           published?: boolean
           published_at?: string | null
           slug?: string
           tags?: string[]
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -120,9 +147,11 @@ export type Database = {
           casino_id: string | null
           created_at: string
           description: string | null
+          description_en: string | null
           expires_at: string | null
           id: string
           title: string
+          title_en: string | null
         }
         Insert: {
           active?: boolean
@@ -130,9 +159,11 @@ export type Database = {
           casino_id?: string | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
           expires_at?: string | null
           id?: string
           title: string
+          title_en?: string | null
         }
         Update: {
           active?: boolean
@@ -140,9 +171,11 @@ export type Database = {
           casino_id?: string | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
           expires_at?: string | null
           id?: string
           title?: string
+          title_en?: string | null
         }
         Relationships: [
           {
@@ -157,10 +190,13 @@ export type Database = {
       casino_reviews: {
         Row: {
           cons: string[]
+          cons_en: string[] | null
           created_at: string
           display_order: number
           extras: Json
+          extras_en: Json | null
           games: string
+          games_en: string | null
           id: string
           license: string
           license_flag: string
@@ -169,21 +205,30 @@ export type Database = {
           logo_url: string | null
           name: string
           payment_methods: string
+          payment_methods_en: string | null
           pros: string[]
+          pros_en: string[] | null
           published: boolean
           slug: string
           support: string
+          support_en: string | null
           title: string
+          title_en: string | null
           updated_at: string
           welcome_bonus: string
+          welcome_bonus_en: string | null
           withdrawals: string
+          withdrawals_en: string | null
         }
         Insert: {
           cons?: string[]
+          cons_en?: string[] | null
           created_at?: string
           display_order?: number
           extras?: Json
+          extras_en?: Json | null
           games?: string
+          games_en?: string | null
           id?: string
           license?: string
           license_flag?: string
@@ -192,21 +237,30 @@ export type Database = {
           logo_url?: string | null
           name: string
           payment_methods?: string
+          payment_methods_en?: string | null
           pros?: string[]
+          pros_en?: string[] | null
           published?: boolean
           slug: string
           support?: string
+          support_en?: string | null
           title: string
+          title_en?: string | null
           updated_at?: string
           welcome_bonus?: string
+          welcome_bonus_en?: string | null
           withdrawals?: string
+          withdrawals_en?: string | null
         }
         Update: {
           cons?: string[]
+          cons_en?: string[] | null
           created_at?: string
           display_order?: number
           extras?: Json
+          extras_en?: Json | null
           games?: string
+          games_en?: string | null
           id?: string
           license?: string
           license_flag?: string
@@ -215,14 +269,20 @@ export type Database = {
           logo_url?: string | null
           name?: string
           payment_methods?: string
+          payment_methods_en?: string | null
           pros?: string[]
+          pros_en?: string[] | null
           published?: boolean
           slug?: string
           support?: string
+          support_en?: string | null
           title?: string
+          title_en?: string | null
           updated_at?: string
           welcome_bonus?: string
+          welcome_bonus_en?: string | null
           withdrawals?: string
+          withdrawals_en?: string | null
         }
         Relationships: []
       }
@@ -231,7 +291,9 @@ export type Database = {
           affiliate_link: string | null
           avg_withdrawal_minutes: number | null
           bonus_text: string | null
+          bonus_text_en: string | null
           cons: string[]
+          cons_en: string[] | null
           created_at: string
           fastest_method: string | null
           fastest_withdrawal_minutes: number | null
@@ -240,15 +302,20 @@ export type Database = {
           game_providers: string[]
           id: string
           logo_alt: string | null
+          logo_alt_en: string | null
           logo_url: string | null
           meta_description: string | null
+          meta_description_en: string | null
           meta_title: string | null
+          meta_title_en: string | null
           name: string
           payment_methods: string[]
           pros: string[]
+          pros_en: string[] | null
           ranking: number
           rating: number
           review_text: string | null
+          review_text_en: string | null
           slug: string
           speed_updated_at: string | null
           tags: string[]
@@ -258,7 +325,9 @@ export type Database = {
           affiliate_link?: string | null
           avg_withdrawal_minutes?: number | null
           bonus_text?: string | null
+          bonus_text_en?: string | null
           cons?: string[]
+          cons_en?: string[] | null
           created_at?: string
           fastest_method?: string | null
           fastest_withdrawal_minutes?: number | null
@@ -267,15 +336,20 @@ export type Database = {
           game_providers?: string[]
           id?: string
           logo_alt?: string | null
+          logo_alt_en?: string | null
           logo_url?: string | null
           meta_description?: string | null
+          meta_description_en?: string | null
           meta_title?: string | null
+          meta_title_en?: string | null
           name: string
           payment_methods?: string[]
           pros?: string[]
+          pros_en?: string[] | null
           ranking?: number
           rating?: number
           review_text?: string | null
+          review_text_en?: string | null
           slug: string
           speed_updated_at?: string | null
           tags?: string[]
@@ -285,7 +359,9 @@ export type Database = {
           affiliate_link?: string | null
           avg_withdrawal_minutes?: number | null
           bonus_text?: string | null
+          bonus_text_en?: string | null
           cons?: string[]
+          cons_en?: string[] | null
           created_at?: string
           fastest_method?: string | null
           fastest_withdrawal_minutes?: number | null
@@ -294,15 +370,20 @@ export type Database = {
           game_providers?: string[]
           id?: string
           logo_alt?: string | null
+          logo_alt_en?: string | null
           logo_url?: string | null
           meta_description?: string | null
+          meta_description_en?: string | null
           meta_title?: string | null
+          meta_title_en?: string | null
           name?: string
           payment_methods?: string[]
           pros?: string[]
+          pros_en?: string[] | null
           ranking?: number
           rating?: number
           review_text?: string | null
+          review_text_en?: string | null
           slug?: string
           speed_updated_at?: string | null
           tags?: string[]
@@ -358,32 +439,38 @@ export type Database = {
       faqs: {
         Row: {
           answer: string
+          answer_en: string | null
           created_at: string
           display_order: number
           id: string
           page_key: string
           published: boolean
           question: string
+          question_en: string | null
           updated_at: string
         }
         Insert: {
           answer?: string
+          answer_en?: string | null
           created_at?: string
           display_order?: number
           id?: string
           page_key: string
           published?: boolean
           question: string
+          question_en?: string | null
           updated_at?: string
         }
         Update: {
           answer?: string
+          answer_en?: string | null
           created_at?: string
           display_order?: number
           id?: string
           page_key?: string
           published?: boolean
           question?: string
+          question_en?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -409,32 +496,44 @@ export type Database = {
       pages: {
         Row: {
           content: string
+          content_en: string | null
           created_at: string
           id: string
           meta_description: string | null
+          meta_description_en: string | null
           meta_title: string | null
+          meta_title_en: string | null
           slug: string
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
           content?: string
+          content_en?: string | null
           created_at?: string
           id?: string
           meta_description?: string | null
+          meta_description_en?: string | null
           meta_title?: string | null
+          meta_title_en?: string | null
           slug: string
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
           content?: string
+          content_en?: string | null
           created_at?: string
           id?: string
           meta_description?: string | null
+          meta_description_en?: string | null
           meta_title?: string | null
+          meta_title_en?: string | null
           slug?: string
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: []

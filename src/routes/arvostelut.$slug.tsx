@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
+import { pick, pickArr, useLang, useT } from "@/lib/i18n";
 
 type Extra = { title: string; content: string };
 type Review = {
@@ -20,6 +21,15 @@ type Review = {
   extras: Extra[];
   pros: string[];
   cons: string[];
+  title_en?: string | null;
+  welcome_bonus_en?: string | null;
+  games_en?: string | null;
+  withdrawals_en?: string | null;
+  support_en?: string | null;
+  payment_methods_en?: string | null;
+  pros_en?: string[] | null;
+  cons_en?: string[] | null;
+  extras_en?: Extra[] | null;
 };
 
 export const Route = createFileRoute("/arvostelut/$slug")({
@@ -44,6 +54,8 @@ export const Route = createFileRoute("/arvostelut/$slug")({
 
 function ReviewPage() {
   const { slug } = Route.useParams();
+  const { lang } = useLang();
+  const t = useT();
   const { data: r, isLoading } = useQuery({
     queryKey: ["review", slug],
     queryFn: async () => {
@@ -60,7 +72,7 @@ function ReviewPage() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Ladataan...</div>
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">{t("common.loading")}</div>
       </Layout>
     );
   }
@@ -69,23 +81,33 @@ function ReviewPage() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="font-display text-3xl mb-2">Arvostelua ei löytynyt</h1>
-          <a href="/arvostelut" className="text-gold hover:underline">← Takaisin arvosteluihin</a>
+          <h1 className="font-display text-3xl mb-2">{t("review.notFound")}</h1>
+          <a href="/arvostelut" className="text-gold hover:underline">{t("review.backToList")}</a>
         </div>
       </Layout>
     );
   }
+
+  const title = pick(lang, r.title, r.title_en);
+  const welcomeBonus = pick(lang, r.welcome_bonus, r.welcome_bonus_en);
+  const games = pick(lang, r.games, r.games_en);
+  const withdrawals = pick(lang, r.withdrawals, r.withdrawals_en);
+  const support = pick(lang, r.support, r.support_en);
+  const payments = pick(lang, r.payment_methods, r.payment_methods_en);
+  const pros = pickArr(lang, r.pros, r.pros_en);
+  const cons = pickArr(lang, r.cons, r.cons_en);
+  const extras: Extra[] = (lang === "en" && r.extras_en && r.extras_en.length > 0 ? r.extras_en : (r.extras ?? []));
 
   return (
     <Layout>
       <article className="container mx-auto px-4 py-10 max-w-4xl">
         <nav className="text-xs text-muted-foreground mb-4">
           <a href="/" className="hover:text-gold">
-            Etusivu
+            {t("common.home")}
           </a>{" "}
           /{" "}
           <a href="/arvostelut" className="hover:text-gold">
-            Arvostelut
+            {t("review.crumb")}
           </a>{" "}
           / {r.name}
         </nav>
@@ -101,22 +123,22 @@ function ReviewPage() {
               {r.license_flag} {r.license}
             </div>
             <h1 className="font-display text-4xl md:text-5xl leading-tight">
-              {r.title}
+              {title}
             </h1>
           </div>
         </header>
 
         <section className="grid md:grid-cols-2 gap-4 mb-8">
-          <FactCard label="Lisenssi" value={`${r.license_flag} ${r.license}`} />
-          <FactCard label="Maksutavat" value={r.payment_methods} />
-          <FactCard label="Kotiutukset" value={r.withdrawals} />
-          <FactCard label="Asiakaspalvelu" value={r.support} />
+          <FactCard label={t("review.license")} value={`${r.license_flag} ${r.license}`} />
+          <FactCard label={t("review.payments")} value={payments ?? ""} />
+          <FactCard label={t("review.withdrawals")} value={withdrawals ?? ""} />
+          <FactCard label={t("review.support")} value={support ?? ""} />
         </section>
 
-        <Block title="🎁 Tervetuliaisbonus">{r.welcome_bonus}</Block>
-        <Block title="🎰 Pelivalikoima">{r.games}</Block>
+        <Block title={t("review.bonus")}>{welcomeBonus}</Block>
+        <Block title={t("review.games")}>{games}</Block>
 
-        {(r.extras ?? []).map((e) => (
+        {extras.map((e) => (
           <Block key={e.title} title={e.title}>
             {e.content}
           </Block>
@@ -125,20 +147,20 @@ function ReviewPage() {
         <div className="grid md:grid-cols-2 gap-4 mt-8">
           <div className="bg-surface gold-border rounded-xl p-5">
             <h2 className="font-display text-2xl text-[color:var(--success)] mb-3">
-              Plussat
+              {t("review.pros")}
             </h2>
             <ul className="space-y-2 text-sm">
-              {r.pros.map((p) => (
+              {pros.map((p) => (
                 <li key={p}>✓ {p}</li>
               ))}
             </ul>
           </div>
           <div className="bg-surface gold-border rounded-xl p-5">
             <h2 className="font-display text-2xl text-[color:var(--danger)] mb-3">
-              Miinukset
+              {t("review.cons")}
             </h2>
             <ul className="space-y-2 text-sm">
-              {r.cons.map((c) => (
+              {cons.map((c) => (
                 <li key={c}>✗ {c}</li>
               ))}
             </ul>
@@ -152,7 +174,7 @@ function ReviewPage() {
         )}
 
         <p className="mt-10 text-[10px] text-muted-foreground text-center">
-          18+ · Pelaa vastuullisesti · T&amp;C voimassa
+          {t("review.disclaimer")}
         </p>
       </article>
     </Layout>

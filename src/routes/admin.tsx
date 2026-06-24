@@ -405,9 +405,17 @@ function CasinosPanel() {
     logo_url: "" as string | null,
     pros: [] as string[],
     cons: [] as string[],
+    bonus_text_en: "",
+    review_text_en: "",
+    pros_en: [] as string[],
+    cons_en: [] as string[],
+    meta_title_en: "",
+    meta_description_en: "",
+    logo_alt_en: "",
   };
   const [form, setForm] = useState(empty);
   const [editing, setEditing] = useState<string | null>(null);
+  const [lang, setLang] = useState<"fi" | "en">("fi");
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -426,6 +434,13 @@ function CasinosPanel() {
       logo_url: form.logo_url,
       pros: form.pros,
       cons: form.cons,
+      bonus_text_en: form.bonus_text_en || null,
+      review_text_en: form.review_text_en || null,
+      pros_en: form.pros_en.length ? form.pros_en : null,
+      cons_en: form.cons_en.length ? form.cons_en : null,
+      meta_title_en: form.meta_title_en || null,
+      meta_description_en: form.meta_description_en || null,
+      logo_alt_en: form.logo_alt_en || null,
     };
     const { error } = editing
       ? await supabase.from("casinos").update(payload).eq("id", editing)
@@ -470,6 +485,12 @@ function CasinosPanel() {
         <h2 className="md:col-span-2 font-display text-2xl text-gold">
           {editing ? "Muokkaa kasinoa" : "Lisää uusi kasino"}
         </h2>
+        <div className="md:col-span-2 flex gap-2 text-sm">
+          <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
+          <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
+        </div>
+        {lang === "fi" ? (
+        <>
         <div className="md:col-span-2">
           <ImageUpload
             bucket="casino-logos"
@@ -552,6 +573,61 @@ function CasinosPanel() {
             accentClass="text-[color:var(--danger)]"
           />
         </div>
+        </>
+        ) : (
+        <>
+          <p className="md:col-span-2 text-xs text-muted-foreground">Jätä kentät tyhjäksi käyttääksesi suomenkielistä versiota EN-tilassa. Nimi, slug, sijoitus ja affiliate-linkki ovat yhteisiä molemmille kielille.</p>
+          <input
+            className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            placeholder="Logo alt (English)"
+            value={form.logo_alt_en}
+            onChange={(e) => setForm({ ...form, logo_alt_en: e.target.value })}
+          />
+          <input
+            className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            placeholder="Bonus text (English)"
+            value={form.bonus_text_en}
+            onChange={(e) => setForm({ ...form, bonus_text_en: e.target.value })}
+          />
+          <textarea
+            className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            rows={3}
+            placeholder="Review text (English)"
+            value={form.review_text_en}
+            onChange={(e) => setForm({ ...form, review_text_en: e.target.value })}
+          />
+          <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
+            <StringListInput
+              label="Pros (English)"
+              value={form.pros_en}
+              onChange={(pros_en) => setForm({ ...form, pros_en })}
+              placeholder="e.g. Instant withdrawals"
+              accentClass="text-[color:var(--success)]"
+            />
+          </div>
+          <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
+            <StringListInput
+              label="Cons (English)"
+              value={form.cons_en}
+              onChange={(cons_en) => setForm({ ...form, cons_en })}
+              placeholder="e.g. Limited game selection"
+              accentClass="text-[color:var(--danger)]"
+            />
+          </div>
+          <input
+            className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            placeholder="SEO meta title (English)"
+            value={form.meta_title_en}
+            onChange={(e) => setForm({ ...form, meta_title_en: e.target.value })}
+          />
+          <input
+            className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            placeholder="SEO meta description (English)"
+            value={form.meta_description_en}
+            onChange={(e) => setForm({ ...form, meta_description_en: e.target.value })}
+          />
+        </>
+        )}
         <div className="md:col-span-2 flex gap-2">
           <button className="flex-1 px-4 py-2.5 gradient-gold text-background font-bold uppercase rounded">
             {editing ? "Päivitä" : "Lisää kasino"}
@@ -611,6 +687,13 @@ function CasinosPanel() {
                     logo_url: c.logo_url ?? null,
                     pros: c.pros ?? [],
                     cons: c.cons ?? [],
+                    bonus_text_en: (c as any).bonus_text_en ?? "",
+                    review_text_en: (c as any).review_text_en ?? "",
+                    pros_en: (c as any).pros_en ?? [],
+                    cons_en: (c as any).cons_en ?? [],
+                    meta_title_en: (c as any).meta_title_en ?? "",
+                    meta_description_en: (c as any).meta_description_en ?? "",
+                    logo_alt_en: (c as any).logo_alt_en ?? "",
                   });
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
@@ -655,9 +738,15 @@ function BlogPanel() {
     cover_image_url: null as string | null,
     meta_title: "",
     meta_description: "",
+    title_en: "",
+    excerpt_en: "",
+    content_en: "",
+    meta_title_en: "",
+    meta_description_en: "",
   };
   const [form, setForm] = useState(empty);
   const [editing, setEditing] = useState<string | null>(null);
+  const [lang, setLang] = useState<"fi" | "en">("fi");
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -675,6 +764,11 @@ function BlogPanel() {
       cover_image_url: form.cover_image_url,
       meta_title: form.meta_title,
       meta_description: form.meta_description,
+      title_en: form.title_en || null,
+      excerpt_en: form.excerpt_en || null,
+      content_en: form.content_en || null,
+      meta_title_en: form.meta_title_en || null,
+      meta_description_en: form.meta_description_en || null,
       published_at: form.published ? new Date().toISOString() : null,
     };
     const { error } = editing
@@ -720,6 +814,10 @@ function BlogPanel() {
         <h2 className="md:col-span-2 font-display text-2xl text-gold">
           {editing ? "Muokkaa artikkelia" : "Uusi blogiartikkeli"}
         </h2>
+        <div className="md:col-span-2 flex gap-1 text-xs">
+          <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
+          <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
+        </div>
         <div className="md:col-span-2">
           <ImageUpload
             bucket="blog-images"
@@ -729,13 +827,22 @@ function BlogPanel() {
             folder="covers"
           />
         </div>
-        <input
-          className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
-          placeholder="Otsikko"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          required
-        />
+        {lang === "fi" ? (
+          <input
+            className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            placeholder="Otsikko"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            required
+          />
+        ) : (
+          <input
+            className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            placeholder="Title (English)"
+            value={form.title_en}
+            onChange={(e) => setForm({ ...form, title_en: e.target.value })}
+          />
+        )}
         <input
           className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
           placeholder="Slug (url-osa)"
@@ -743,22 +850,36 @@ function BlogPanel() {
           onChange={(e) => setForm({ ...form, slug: e.target.value })}
           required
         />
-        <textarea
-          className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
-          rows={2}
-          placeholder="Lyhyt ote (näkyy listauksessa)"
-          value={form.excerpt}
-          onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-        />
-        <div className="md:col-span-2">
-          <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">
-            Sisältö
-          </label>
-          <RichTextEditor
-            value={form.content}
-            onChange={(html) => setForm((f) => ({ ...f, content: html }))}
-          />
-        </div>
+        {lang === "fi" ? (
+          <>
+            <textarea
+              className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+              rows={2}
+              placeholder="Lyhyt ote (näkyy listauksessa)"
+              value={form.excerpt}
+              onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+            />
+            <div className="md:col-span-2">
+              <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">Sisältö</label>
+              <RichTextEditor value={form.content} onChange={(html) => setForm((f) => ({ ...f, content: html }))} />
+            </div>
+          </>
+        ) : (
+          <>
+            <textarea
+              className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+              rows={2}
+              placeholder="Short excerpt (English)"
+              value={form.excerpt_en}
+              onChange={(e) => setForm({ ...form, excerpt_en: e.target.value })}
+            />
+            <div className="md:col-span-2">
+              <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">Content (English)</label>
+              <RichTextEditor value={form.content_en} onChange={(html) => setForm((f) => ({ ...f, content_en: html }))} />
+              <p className="text-[11px] text-muted-foreground mt-2">Jätä tyhjäksi jos et halua erillistä englanninkielistä versiota.</p>
+            </div>
+          </>
+        )}
         <input
           className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
           placeholder="Kirjoittaja"
@@ -771,18 +892,17 @@ function BlogPanel() {
           value={form.tags}
           onChange={(e) => setForm({ ...form, tags: e.target.value })}
         />
-        <input
-          className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
-          placeholder="SEO meta-otsikko"
-          value={form.meta_title}
-          onChange={(e) => setForm({ ...form, meta_title: e.target.value })}
-        />
-        <input
-          className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
-          placeholder="SEO meta-kuvaus"
-          value={form.meta_description}
-          onChange={(e) => setForm({ ...form, meta_description: e.target.value })}
-        />
+        {lang === "fi" ? (
+          <>
+            <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="SEO meta-otsikko" value={form.meta_title} onChange={(e) => setForm({ ...form, meta_title: e.target.value })} />
+            <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="SEO meta-kuvaus" value={form.meta_description} onChange={(e) => setForm({ ...form, meta_description: e.target.value })} />
+          </>
+        ) : (
+          <>
+            <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="SEO meta title (English)" value={form.meta_title_en} onChange={(e) => setForm({ ...form, meta_title_en: e.target.value })} />
+            <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="SEO meta description (English)" value={form.meta_description_en} onChange={(e) => setForm({ ...form, meta_description_en: e.target.value })} />
+          </>
+        )}
         <label className="md:col-span-2 flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -850,6 +970,11 @@ function BlogPanel() {
                     cover_image_url: p.cover_image_url,
                     meta_title: p.meta_title ?? "",
                     meta_description: p.meta_description ?? "",
+                    title_en: (p as any).title_en ?? "",
+                    excerpt_en: (p as any).excerpt_en ?? "",
+                    content_en: (p as any).content_en ?? "",
+                    meta_title_en: (p as any).meta_title_en ?? "",
+                    meta_description_en: (p as any).meta_description_en ?? "",
                   });
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
@@ -1173,6 +1298,10 @@ function PagesPanel() {
         meta_title: editing.meta_title,
         meta_description: editing.meta_description,
         content: editing.content,
+        title_en: editing.title_en || null,
+        meta_title_en: editing.meta_title_en || null,
+        meta_description_en: editing.meta_description_en || null,
+        content_en: editing.content_en || null,
       })
       .eq("id", editing.id);
     if (error) return toast.error(error.message);
@@ -1183,55 +1312,63 @@ function PagesPanel() {
   };
 
   if (editing) {
+    const lang = (editing.__lang as "fi" | "en") ?? "fi";
+    const setLang = (l: "fi" | "en") => setEditing({ ...editing, __lang: l });
     return (
       <div className="space-y-4">
         <button onClick={() => setEditing(null)} className="text-sm text-gold underline">
           ← Takaisin
         </button>
         <div className="bg-surface gold-border rounded-xl p-5 space-y-4">
+          <div className="flex gap-1 text-xs">
+            <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
+            <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
+          </div>
           <div>
             <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">
-              Otsikko
+              {lang === "fi" ? "Otsikko" : "Title (English)"}
             </label>
             <input
-              value={editing.title ?? ""}
-              onChange={(e) => setEditing({ ...editing, title: e.target.value })}
+              value={(lang === "fi" ? editing.title : editing.title_en) ?? ""}
+              onChange={(e) => setEditing({ ...editing, [lang === "fi" ? "title" : "title_en"]: e.target.value })}
               className="w-full bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
             />
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">
-                SEO Meta Title
+                {lang === "fi" ? "SEO Meta Title" : "SEO Meta Title (English)"}
               </label>
               <input
-                value={editing.meta_title ?? ""}
-                onChange={(e) => setEditing({ ...editing, meta_title: e.target.value })}
+                value={(lang === "fi" ? editing.meta_title : editing.meta_title_en) ?? ""}
+                onChange={(e) => setEditing({ ...editing, [lang === "fi" ? "meta_title" : "meta_title_en"]: e.target.value })}
                 className="w-full bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
               />
             </div>
             <div>
               <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">
-                SEO Meta Description
+                {lang === "fi" ? "SEO Meta Description" : "SEO Meta Description (English)"}
               </label>
               <input
-                value={editing.meta_description ?? ""}
-                onChange={(e) => setEditing({ ...editing, meta_description: e.target.value })}
+                value={(lang === "fi" ? editing.meta_description : editing.meta_description_en) ?? ""}
+                onChange={(e) => setEditing({ ...editing, [lang === "fi" ? "meta_description" : "meta_description_en"]: e.target.value })}
                 className="w-full bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
               />
             </div>
           </div>
           <div>
             <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">
-              Sisältö (rich text)
+              {lang === "fi" ? "Sisältö (rich text)" : "Content (English, rich text)"}
             </label>
-            <RichTextEditor
-              value={editing.content ?? ""}
-              onChange={(v) => setEditing({ ...editing, content: v })}
-            />
+            {lang === "fi" ? (
+              <RichTextEditor value={editing.content ?? ""} onChange={(v) => setEditing({ ...editing, content: v })} />
+            ) : (
+              <RichTextEditor value={editing.content_en ?? ""} onChange={(v) => setEditing({ ...editing, content_en: v })} />
+            )}
             <p className="text-[11px] text-muted-foreground mt-2">
-              Voit upottaa lohkoja: <code>[casinos limit=5]</code> näyttää top-kasinot,{" "}
-              <code>[bonus_alerts]</code> näyttää aktiiviset bonusilmoitukset.
+              {lang === "fi"
+                ? <>Voit upottaa lohkoja: <code>[casinos limit=5]</code> näyttää top-kasinot, <code>[bonus_alerts]</code> näyttää aktiiviset bonusilmoitukset. Jätä englanninkielinen sisältö tyhjäksi jos haluat näyttää suomenkielisen myös EN-tilassa.</>
+                : "Leave blank to fall back to the Finnish content when language is English."}
             </p>
           </div>
           <div className="flex gap-2">
@@ -1773,6 +1910,15 @@ type ReviewForm = {
   cons: string[];
   display_order: number;
   published: boolean;
+  title_en: string;
+  welcome_bonus_en: string;
+  games_en: string;
+  withdrawals_en: string;
+  support_en: string;
+  payment_methods_en: string;
+  pros_en: string[];
+  cons_en: string[];
+  extras_en: ReviewExtra[];
 };
 
 const emptyReview: ReviewForm = {
@@ -1794,6 +1940,15 @@ const emptyReview: ReviewForm = {
   cons: [],
   display_order: 100,
   published: true,
+  title_en: "",
+  welcome_bonus_en: "",
+  games_en: "",
+  withdrawals_en: "",
+  support_en: "",
+  payment_methods_en: "",
+  pros_en: [],
+  cons_en: [],
+  extras_en: [],
 };
 
 function ReviewsPanel() {
@@ -1805,6 +1960,7 @@ function ReviewsPanel() {
   });
   const [form, setForm] = useState<ReviewForm>(emptyReview);
   const [editing, setEditing] = useState<string | null>(null);
+  const [lang, setLang] = useState<"fi" | "en">("fi");
   const [filterGroup, setFilterGroup] = useState<string>("all");
   const [fetchingLogos, setFetchingLogos] = useState(false);
   const fetchLogo = useServerFn(fetchCasinoLogo);
@@ -1853,6 +2009,15 @@ function ReviewsPanel() {
       ...form,
       license_tax_note: form.license_tax_note || null,
       extras: form.extras,
+      title_en: form.title_en || null,
+      welcome_bonus_en: form.welcome_bonus_en || null,
+      games_en: form.games_en || null,
+      withdrawals_en: form.withdrawals_en || null,
+      support_en: form.support_en || null,
+      payment_methods_en: form.payment_methods_en || null,
+      pros_en: form.pros_en && form.pros_en.length > 0 ? form.pros_en : null,
+      cons_en: form.cons_en && form.cons_en.length > 0 ? form.cons_en : null,
+      extras_en: form.extras_en && form.extras_en.length > 0 ? form.extras_en : null,
     };
     const { error } = editing
       ? await supabase.from("casino_reviews").update(payload).eq("id", editing)
@@ -1901,6 +2066,15 @@ function ReviewsPanel() {
       cons: r.cons ?? [],
       display_order: r.display_order ?? 100,
       published: r.published ?? true,
+      title_en: (r as any).title_en ?? "",
+      welcome_bonus_en: (r as any).welcome_bonus_en ?? "",
+      games_en: (r as any).games_en ?? "",
+      withdrawals_en: (r as any).withdrawals_en ?? "",
+      support_en: (r as any).support_en ?? "",
+      payment_methods_en: (r as any).payment_methods_en ?? "",
+      pros_en: (r as any).pros_en ?? [],
+      cons_en: (r as any).cons_en ?? [],
+      extras_en: (Array.isArray((r as any).extras_en) ? (r as any).extras_en : []) as ReviewExtra[],
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -1912,6 +2086,11 @@ function ReviewsPanel() {
     next[i] = { ...next[i], ...patch };
     setForm({ ...form, extras: next });
   };
+  const setExtraEn = (i: number, patch: Partial<ReviewExtra>) => {
+    const next = form.extras_en.slice();
+    next[i] = { ...next[i], ...patch };
+    setForm({ ...form, extras_en: next });
+  };
 
   return (
     <>
@@ -1919,6 +2098,10 @@ function ReviewsPanel() {
         <h2 className="md:col-span-2 font-display text-2xl text-gold">
           {editing ? `Muokkaa arvostelua: ${form.name}` : "Lisää uusi arvostelu"}
         </h2>
+        <div className="md:col-span-2 flex gap-1 text-xs">
+          <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
+          <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
+        </div>
 
         <div className="md:col-span-2">
           <ImageUpload
@@ -1931,7 +2114,11 @@ function ReviewsPanel() {
 
         <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Nimi" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Slug (esim. pelikaani)" required value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
-        <input className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Otsikko (sivulla näkyvä H1)" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        {lang === "fi" ? (
+          <input className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Otsikko (sivulla näkyvä H1)" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        ) : (
+          <input className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Title in English (page H1)" value={form.title_en} onChange={(e) => setForm({ ...form, title_en: e.target.value })} />
+        )}
 
         <select className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" value={form.license_group} onChange={(e) => setForm({ ...form, license_group: e.target.value })}>
           {REVIEW_GROUPS.map((g) => (<option key={g.id} value={g.id}>{g.flag} {g.label}</option>))}
@@ -1940,32 +2127,57 @@ function ReviewsPanel() {
         <input className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Lisenssin teksti" value={form.license} onChange={(e) => setForm({ ...form, license: e.target.value })} />
         <input className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Lisenssin verohuomautus (valinnainen)" value={form.license_tax_note} onChange={(e) => setForm({ ...form, license_tax_note: e.target.value })} />
 
-        <textarea rows={2} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Maksutavat" value={form.payment_methods} onChange={(e) => setForm({ ...form, payment_methods: e.target.value })} />
-        <textarea rows={3} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Tervetuliaisbonus" value={form.welcome_bonus} onChange={(e) => setForm({ ...form, welcome_bonus: e.target.value })} />
-        <textarea rows={2} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Pelivalikoima" value={form.games} onChange={(e) => setForm({ ...form, games: e.target.value })} />
-        <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Kotiutukset" value={form.withdrawals} onChange={(e) => setForm({ ...form, withdrawals: e.target.value })} />
-        <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Asiakaspalvelu" value={form.support} onChange={(e) => setForm({ ...form, support: e.target.value })} />
+        {lang === "fi" ? (
+          <>
+            <textarea rows={2} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Maksutavat" value={form.payment_methods} onChange={(e) => setForm({ ...form, payment_methods: e.target.value })} />
+            <textarea rows={3} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Tervetuliaisbonus" value={form.welcome_bonus} onChange={(e) => setForm({ ...form, welcome_bonus: e.target.value })} />
+            <textarea rows={2} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Pelivalikoima" value={form.games} onChange={(e) => setForm({ ...form, games: e.target.value })} />
+            <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Kotiutukset" value={form.withdrawals} onChange={(e) => setForm({ ...form, withdrawals: e.target.value })} />
+            <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Asiakaspalvelu" value={form.support} onChange={(e) => setForm({ ...form, support: e.target.value })} />
+          </>
+        ) : (
+          <>
+            <textarea rows={2} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Payment methods (English)" value={form.payment_methods_en} onChange={(e) => setForm({ ...form, payment_methods_en: e.target.value })} />
+            <textarea rows={3} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Welcome bonus (English)" value={form.welcome_bonus_en} onChange={(e) => setForm({ ...form, welcome_bonus_en: e.target.value })} />
+            <textarea rows={2} className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Games (English)" value={form.games_en} onChange={(e) => setForm({ ...form, games_en: e.target.value })} />
+            <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Withdrawals (English)" value={form.withdrawals_en} onChange={(e) => setForm({ ...form, withdrawals_en: e.target.value })} />
+            <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Customer support (English)" value={form.support_en} onChange={(e) => setForm({ ...form, support_en: e.target.value })} />
+          </>
+        )}
 
         <div className="md:col-span-2 bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="font-bold text-sm uppercase text-gold">Lisäosiot (extras)</div>
-            <button type="button" onClick={() => setForm({ ...form, extras: [...form.extras, { title: "", content: "" }] })} className="text-xs px-2 py-1 border border-[color:var(--gold)]/40 rounded">+ Lisää osio</button>
+            <div className="font-bold text-sm uppercase text-gold">{lang === "fi" ? "Lisäosiot (extras)" : "Extras (English)"}</div>
+            <button type="button" onClick={() => lang === "fi" ? setForm({ ...form, extras: [...form.extras, { title: "", content: "" }] }) : setForm({ ...form, extras_en: [...form.extras_en, { title: "", content: "" }] })} className="text-xs px-2 py-1 border border-[color:var(--gold)]/40 rounded">+ {lang === "fi" ? "Lisää osio" : "Add section"}</button>
           </div>
-          {form.extras.map((ex, i) => (
+          {(lang === "fi" ? form.extras : form.extras_en).map((ex, i) => (
             <div key={i} className="grid md:grid-cols-[1fr_2fr_auto] gap-2">
-              <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Otsikko" value={ex.title} onChange={(e) => setExtra(i, { title: e.target.value })} />
-              <textarea rows={2} className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Sisältö" value={ex.content} onChange={(e) => setExtra(i, { content: e.target.value })} />
-              <button type="button" onClick={() => setForm({ ...form, extras: form.extras.filter((_, j) => j !== i) })} className="text-xs text-[color:var(--danger)] underline">Poista</button>
+              <input className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder={lang === "fi" ? "Otsikko" : "Title"} value={ex.title} onChange={(e) => lang === "fi" ? setExtra(i, { title: e.target.value }) : setExtraEn(i, { title: e.target.value })} />
+              <textarea rows={2} className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder={lang === "fi" ? "Sisältö" : "Content"} value={ex.content} onChange={(e) => lang === "fi" ? setExtra(i, { content: e.target.value }) : setExtraEn(i, { content: e.target.value })} />
+              <button type="button" onClick={() => lang === "fi" ? setForm({ ...form, extras: form.extras.filter((_, j) => j !== i) }) : setForm({ ...form, extras_en: form.extras_en.filter((_, j) => j !== i) })} className="text-xs text-[color:var(--danger)] underline">{lang === "fi" ? "Poista" : "Remove"}</button>
             </div>
           ))}
         </div>
 
-        <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
-          <StringListInput label="Plussat" value={form.pros} onChange={(pros) => setForm({ ...form, pros })} placeholder="Esim. Nopeat kotiutukset" accentClass="text-[color:var(--success)]" />
-        </div>
-        <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
-          <StringListInput label="Miinukset" value={form.cons} onChange={(cons) => setForm({ ...form, cons })} placeholder="Esim. Suppea pelivalikoima" accentClass="text-[color:var(--danger)]" />
-        </div>
+        {lang === "fi" ? (
+          <>
+            <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
+              <StringListInput label="Plussat" value={form.pros} onChange={(pros) => setForm({ ...form, pros })} placeholder="Esim. Nopeat kotiutukset" accentClass="text-[color:var(--success)]" />
+            </div>
+            <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
+              <StringListInput label="Miinukset" value={form.cons} onChange={(cons) => setForm({ ...form, cons })} placeholder="Esim. Suppea pelivalikoima" accentClass="text-[color:var(--danger)]" />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
+              <StringListInput label="Pros (English)" value={form.pros_en} onChange={(pros_en) => setForm({ ...form, pros_en })} placeholder="e.g. Fast withdrawals" accentClass="text-[color:var(--success)]" />
+            </div>
+            <div className="bg-background/50 rounded-lg p-3 border border-[color:var(--gold)]/20">
+              <StringListInput label="Cons (English)" value={form.cons_en} onChange={(cons_en) => setForm({ ...form, cons_en })} placeholder="e.g. Limited game selection" accentClass="text-[color:var(--danger)]" />
+            </div>
+          </>
+        )}
 
         <input type="number" className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2" placeholder="Järjestys" value={form.display_order} onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })} />
         <label className="flex items-center gap-2 text-sm">
@@ -2055,13 +2267,22 @@ function AuthorsPanel() {
     content: "",
     display_order: 100,
     published: true,
+    role_en: "",
+    tagline_en: "",
+    content_en: "",
   };
   const [form, setForm] = useState(empty);
   const [editing, setEditing] = useState<string | null>(null);
+  const [lang, setLang] = useState<"fi" | "en">("fi");
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...form };
+    const payload = {
+      ...form,
+      role_en: form.role_en || null,
+      tagline_en: form.tagline_en || null,
+      content_en: form.content_en || null,
+    };
     const { error } = editing
       ? await supabase.from("authors").update(payload).eq("id", editing)
       : await supabase.from("authors").insert(payload);
@@ -2103,6 +2324,12 @@ function AuthorsPanel() {
         <h2 className="md:col-span-2 font-display text-2xl text-gold">
           {editing ? "Muokkaa kirjoittajaa" : "Uusi kirjoittaja"}
         </h2>
+        <div className="md:col-span-2 flex gap-2 text-sm">
+          <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
+          <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
+        </div>
+        {lang === "fi" ? (
+        <>
         <div className="md:col-span-2">
           <ImageUpload
             bucket="blog-images"
@@ -2156,6 +2383,34 @@ function AuthorsPanel() {
           />
           Julkaise (näkyy sivustolla)
         </label>
+        </>
+        ) : (
+        <>
+          <p className="md:col-span-2 text-xs text-muted-foreground">Jätä kentät tyhjäksi käyttääksesi suomenkielistä versiota EN-tilassa.</p>
+          <input
+            className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            placeholder="Role (English)"
+            value={form.role_en}
+            onChange={(e) => setForm({ ...form, role_en: e.target.value })}
+          />
+          <textarea
+            className="md:col-span-2 bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+            rows={2}
+            placeholder="Short tagline (English)"
+            value={form.tagline_en}
+            onChange={(e) => setForm({ ...form, tagline_en: e.target.value })}
+          />
+          <div className="md:col-span-2">
+            <label className="text-xs uppercase tracking-wider text-muted-foreground block mb-1">
+              Bio (English)
+            </label>
+            <RichTextEditor
+              value={form.content_en}
+              onChange={(html) => setForm((f) => ({ ...f, content_en: html }))}
+            />
+          </div>
+        </>
+        )}
         <div className="md:col-span-2 flex gap-2">
           <button className="flex-1 px-4 py-2.5 gradient-gold text-background font-bold uppercase rounded">
             {editing ? "Päivitä" : "Tallenna"}
@@ -2213,6 +2468,9 @@ function AuthorsPanel() {
                     content: a.content ?? "",
                     display_order: a.display_order ?? 100,
                     published: a.published,
+                    role_en: (a as any).role_en ?? "",
+                    tagline_en: (a as any).tagline_en ?? "",
+                    content_en: (a as any).content_en ?? "",
                   });
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}

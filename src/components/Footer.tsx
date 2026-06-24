@@ -7,11 +7,13 @@ import {
   type FooterSettings,
   type HeaderSettings,
 } from "@/lib/cms";
+import { useT } from "@/lib/i18n";
 
 export function Footer() {
   const f = useSiteSetting<FooterSettings>("footer", DEFAULT_FOOTER);
   const h = useSiteSetting<HeaderSettings>("header", DEFAULT_HEADER);
   const headerGroups = h.groups ?? [];
+  const t = useT();
   return (
     <footer className="mt-24 border-t border-[color:var(--gold)]/20 bg-surface">
       <div className="suit-divider py-4">♠ ♥ ♦ ♣</div>
@@ -69,10 +71,10 @@ export function Footer() {
           </div>
         ))}
         <div>
-          <h3 className="text-xs uppercase tracking-widest text-gold mb-3">Vastuullisesti</h3>
+          <h3 className="text-xs uppercase tracking-widest text-gold mb-3">{t("footer.responsible")}</h3>
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-block px-2 py-0.5 border-2 border-[color:var(--gold)] rounded font-display text-gold text-lg leading-none">18+</span>
-            <span className="text-xs text-muted-foreground">Vain täysi-ikäisille</span>
+            <span className="text-xs text-muted-foreground">{t("footer.adultsOnly")}</span>
           </div>
           {f.responsible_text && <p className="text-xs text-muted-foreground">{f.responsible_text}</p>}
         </div>

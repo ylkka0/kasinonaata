@@ -5,11 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import type { Database } from "@/integrations/supabase/types";
 import { CURRENT_MONTH, CURRENT_YEAR } from "./constants";
+import { useLang, useT, pick } from "@/lib/i18n";
 
 type Casino = Database["public"]["Tables"]["casinos"]["Row"];
 
 /** Välitön CTA: TOP 3 kasinoa hero-osiossa, animoitu lista. */
 export function Top3HeroCards() {
+  const { lang } = useLang();
+  const t = useT();
   const [selected, setSelected] = useState<Casino | null>(null);
   const { data: casinos = [] } = useQuery({
     queryKey: ["casinos-top3"],
@@ -24,7 +27,7 @@ export function Top3HeroCards() {
       <div className="mb-3 text-[11px] uppercase tracking-[0.25em] text-gold/80">
         <span className="inline-flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--success)] animate-pulse" />
-          UUDET KASINOT {CURRENT_YEAR} {CURRENT_MONTH.toUpperCase()}
+          {t("top3.kicker")} {CURRENT_YEAR} {CURRENT_MONTH.toUpperCase()}
         </span>
       </div>
 
@@ -45,10 +48,13 @@ export function Top3HeroCards() {
             key={c.id}
             type="button"
             onClick={() => setSelected(c)}
-            className={`top3-card top3-card-${i + 1} group relative block w-full text-left overflow-hidden rounded-2xl border-2 backdrop-blur p-3.5 md:p-4 ${rankStyles} hover:border-[color:var(--gold)] hover:gold-glow cursor-pointer`}
+            className={`top3-card top3-card-${i + 1} group relative block w-full text-left rounded-2xl border-2 backdrop-blur p-3.5 md:p-4 ${i === 0 ? "mt-4" : ""} ${rankStyles} hover:border-[color:var(--gold)] hover:gold-glow cursor-pointer`}
           >
             {i === 0 && (
-              <div className="top3-crown absolute -top-3 right-3 text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">👑</div>
+              <div className="top3-crown absolute -top-5 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-[color:var(--gold)] to-[color:var(--gold-soft)] text-background shadow-[0_0_18px_color-mix(in_oklab,var(--gold)_85%,transparent)] border border-[color:var(--gold-soft)]">
+                <span className="text-xl leading-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">👑</span>
+                <span className="text-[10px] font-display tracking-[0.18em] uppercase">{t("top3.top1")}</span>
+              </div>
             )}
             <div className="flex items-center gap-3 md:gap-4 relative">
               <div className="relative shrink-0">
@@ -75,7 +81,7 @@ export function Top3HeroCards() {
                   </div>
                 </div>
                 <div className="font-semibold text-foreground/95 truncate text-sm">
-                  {c.bonus_text ?? "Tervetulobonus uusille pelaajille"}
+                  {pick(lang, c.bonus_text, (c as any).bonus_text_en) ?? t("top3.defaultBonus")}
                 </div>
                 {c.review_text && (
                   <div className="text-xs text-muted-foreground truncate">
@@ -112,8 +118,8 @@ export function Top3HeroCards() {
 
               {selected.bonus_text && (
                 <div className="bg-background/60 rounded-lg p-3">
-                  <div className="text-[10px] uppercase tracking-widest text-gold">Bonus</div>
-                  <div className="font-semibold text-foreground">{selected.bonus_text}</div>
+                  <div className="text-[10px] uppercase tracking-widest text-gold">{t("top3.bonus")}</div>
+                  <div className="font-semibold text-foreground">{pick(lang, selected.bonus_text, (selected as any).bonus_text_en)}</div>
                 </div>
               )}
 
@@ -125,7 +131,7 @@ export function Top3HeroCards() {
 
               {((selected.pros && selected.pros.length > 0) || (selected.cons && selected.cons.length > 0)) && (
                 <div className="bg-background/40 rounded-lg p-3">
-                  <div className="text-[11px] uppercase tracking-widest text-gold mb-2 font-bold">Plussat & Miinukset</div>
+                  <div className="text-[11px] uppercase tracking-widest text-gold mb-2 font-bold">{t("top3.prosCons")}</div>
                   <ul className="space-y-1 text-sm">
                     {selected.pros?.slice(0, 5).map((p, i) => (
                       <li key={`p-${i}`} className="flex gap-2">
@@ -150,7 +156,7 @@ export function Top3HeroCards() {
                   rel="nofollow sponsored noopener"
                   className="flex-1 text-center px-4 py-2.5 text-sm rounded-lg font-bold uppercase tracking-wider bg-[color:var(--success)] text-background hover:opacity-90 transition-opacity"
                 >
-                  Pelaa nyt →
+                  {t("top3.playNow")}
                 </a>
                 <Link
                   to="/kasinot/$slug"
@@ -158,12 +164,12 @@ export function Top3HeroCards() {
                   onClick={() => setSelected(null)}
                   className="px-4 py-2.5 text-sm rounded-lg font-semibold uppercase tracking-wider border border-[color:var(--gold)]/40 text-gold hover:bg-surface-2"
                 >
-                  Lue arvio
+                  {t("top3.readReview")}
                 </Link>
               </div>
 
               <div className="text-[10px] text-muted-foreground/70 text-center pt-1">
-                18+ · Vain uusille pelaajille · T&amp;C voimassa · Pelaa vastuullisesti
+                {t("top3.terms")}
               </div>
             </>
           )}

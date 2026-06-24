@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
 import { PageContent } from "@/components/PageContent";
-import { usePage } from "@/lib/cms";
+import { usePage, localizedPage } from "@/lib/cms";
+import { useLang, useT } from "@/lib/i18n";
 
 /**
  * Renders a CMS-managed page by slug. Children render BELOW the CMS content
@@ -18,18 +19,21 @@ export function CmsPage({
   children?: React.ReactNode;
 }) {
   const { data: page, isLoading } = usePage(slug);
+  const { lang } = useLang();
+  const t = useT();
+  const p = localizedPage(page, lang);
   return (
     <Layout>
       <section className="container mx-auto px-4 py-12">
         <nav className="text-xs text-muted-foreground mb-3">
-          <a href="/" className="hover:text-gold">Etusivu</a> / {breadcrumb ?? page?.title ?? fallbackTitle}
+          <a href="/" className="hover:text-gold">{t("common.home")}</a> / {breadcrumb ?? p?.title ?? fallbackTitle}
         </nav>
-        <h1 className="font-display text-5xl mb-6">{page?.title ?? fallbackTitle}</h1>
+        <h1 className="font-display text-5xl mb-6">{p?.title ?? fallbackTitle}</h1>
         {isLoading ? (
-          <p className="text-muted-foreground">Ladataan…</p>
+          <p className="text-muted-foreground">{t("common.loading")}</p>
         ) : (
           <div className="max-w-4xl">
-            <PageContent html={page?.content ?? ""} />
+            <PageContent html={p?.content ?? ""} />
           </div>
         )}
         {children}

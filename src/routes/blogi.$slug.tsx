@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
 import DOMPurify from "isomorphic-dompurify";
+import { pick, useLang, useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/blogi/$slug")({
   head: ({ params }) => ({
@@ -41,6 +42,8 @@ function renderMarkdown(md: string): string {
 
 function BlogPost() {
   const { slug } = Route.useParams();
+  const { lang } = useLang();
+  const t = useT();
   const { data: post, isLoading } = useQuery({
     queryKey: ["blog-post", slug],
     queryFn: async () => {
@@ -50,32 +53,37 @@ function BlogPost() {
     },
   });
 
-  if (isLoading || !post) return <Layout><div className="container mx-auto px-4 py-20">Ladataan...</div></Layout>;
+  if (isLoading || !post) return <Layout><div className="container mx-auto px-4 py-20">{t("common.loading")}</div></Layout>;
+
+  const title = pick(lang, post.title, (post as any).title_en);
+  const excerpt = pick(lang, post.excerpt, (post as any).excerpt_en);
+  const content = pick(lang, post.content, (post as any).content_en);
+  const coverAlt = pick(lang, post.cover_image_alt, (post as any).cover_image_alt_en);
 
   return (
     <Layout>
       <article className="container mx-auto px-4 py-10 max-w-3xl">
         <nav className="text-xs text-muted-foreground mb-4">
-          <Link to="/" className="hover:text-gold">Etusivu</Link> / <Link to="/blogi" className="hover:text-gold">Blogi</Link> / {post.title}
+          <Link to="/" className="hover:text-gold">{t("common.home")}</Link> / <Link to="/blogi" className="hover:text-gold">{t("blog.crumb")}</Link> / {title}
         </nav>
         {post.tags && post.tags.length > 0 && (
           <div className="flex gap-2 flex-wrap mb-3">
             {post.tags.map((t) => <span key={t} className="text-[11px] uppercase tracking-wider text-gold border border-[color:var(--gold)]/40 rounded-full px-2 py-0.5">{t}</span>)}
           </div>
         )}
-        <h1 className="font-display text-5xl leading-tight mb-3">{post.title}</h1>
+        <h1 className="font-display text-5xl leading-tight mb-3">{title}</h1>
         <div className="text-sm text-muted-foreground mb-6">
-          {post.author} · {post.published_at && new Date(post.published_at).toLocaleDateString("fi-FI")}
+          {post.author} · {post.published_at && new Date(post.published_at).toLocaleDateString(lang === "en" ? "en-GB" : "fi-FI")}
         </div>
         {post.cover_image_url && (
-          <img src={post.cover_image_url} alt={post.cover_image_alt ?? post.title} className="w-full rounded-xl mb-8" />
+          <img src={post.cover_image_url} alt={coverAlt ?? title} className="w-full rounded-xl mb-8" />
         )}
-        {post.excerpt && <p className="text-lg text-foreground/85 mb-6 italic">{post.excerpt}</p>}
+        {excerpt && <p className="text-lg text-foreground/85 mb-6 italic">{excerpt}</p>}
         <div
           className="text-foreground/90 [&_h2]:font-display [&_h2]:text-3xl [&_h2]:text-[color:var(--gold)] [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:font-display [&_h3]:text-2xl [&_h3]:text-[color:var(--gold)] [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:my-3 [&_p]:leading-relaxed [&_a]:text-[color:var(--gold)] [&_a]:underline [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-4 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-4 [&_img]:rounded-lg [&_img]:my-4 [&_img]:max-w-full [&_img]:h-auto [&_blockquote]:border-l-2 [&_blockquote]:border-[color:var(--gold)] [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold"
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(
-              post.content.trim().startsWith("<") ? post.content : renderMarkdown(post.content),
+              (content ?? "").trim().startsWith("<") ? (content ?? "") : renderMarkdown(content ?? ""),
             ),
           }}
         />

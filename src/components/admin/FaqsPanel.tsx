@@ -64,9 +64,10 @@ export function FaqsPanel() {
       ).data ?? [],
   });
 
-  const empty = { question: "", answer: "", published: true, display_order: 100 };
+  const empty = { question: "", answer: "", question_en: "", answer_en: "", published: true, display_order: 100 };
   const [form, setForm] = useState(empty);
   const [editing, setEditing] = useState<string | null>(null);
+  const [tab, setTab] = useState<"fi" | "en">("fi");
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["admin-faqs", pageKey] });
@@ -165,20 +166,44 @@ export function FaqsPanel() {
         <h2 className="font-display text-2xl text-gold">
           {editing ? "Muokkaa kysymystä" : "Uusi kysymys"} — {pageKey}
         </h2>
-        <input
-          className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
-          placeholder="Kysymys"
-          value={form.question}
-          onChange={(e) => setForm({ ...form, question: e.target.value })}
-          required
-        />
-        <textarea
-          className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2 min-h-[120px]"
-          placeholder="Vastaus"
-          value={form.answer}
-          onChange={(e) => setForm({ ...form, answer: e.target.value })}
-          required
-        />
+        <div className="flex gap-1 text-xs">
+          <button type="button" onClick={() => setTab("fi")} className={`px-3 py-1.5 rounded ${tab === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
+          <button type="button" onClick={() => setTab("en")} className={`px-3 py-1.5 rounded ${tab === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
+        </div>
+        {tab === "fi" ? (
+          <>
+            <input
+              className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+              placeholder="Kysymys"
+              value={form.question}
+              onChange={(e) => setForm({ ...form, question: e.target.value })}
+              required
+            />
+            <textarea
+              className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2 min-h-[120px]"
+              placeholder="Vastaus"
+              value={form.answer}
+              onChange={(e) => setForm({ ...form, answer: e.target.value })}
+              required
+            />
+          </>
+        ) : (
+          <>
+            <input
+              className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+              placeholder="Question (English)"
+              value={form.question_en ?? ""}
+              onChange={(e) => setForm({ ...form, question_en: e.target.value })}
+            />
+            <textarea
+              className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2 min-h-[120px]"
+              placeholder="Answer (English)"
+              value={form.answer_en ?? ""}
+              onChange={(e) => setForm({ ...form, answer_en: e.target.value })}
+            />
+            <p className="text-[11px] text-muted-foreground">Jätä tyhjäksi jos et halua erillistä englanninkielistä versiota — suomenkielinen näytetään myös EN-tilassa.</p>
+          </>
+        )}
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -241,6 +266,8 @@ export function FaqsPanel() {
                   setForm({
                     question: f.question,
                     answer: f.answer,
+                    question_en: (f as any).question_en ?? "",
+                    answer_en: (f as any).answer_en ?? "",
                     published: f.published,
                     display_order: f.display_order,
                   });
