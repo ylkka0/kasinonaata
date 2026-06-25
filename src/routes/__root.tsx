@@ -77,8 +77,24 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+const MAINTENANCE_MODE = true;
+
 function RootComponent() {
+  if (MAINTENANCE_MODE) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="max-w-md text-center">
+          <h1 className="font-display text-4xl">Huoltotila</h1>
+          <p className="mt-4 text-muted-foreground">
+            Kasinonäätä on tilapäisesti pois käytöstä.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const { queryClient } = Route.useRouteContext();
+
   return (
     <QueryClientProvider client={queryClient}>
       <LangProvider>
