@@ -1,5 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { FAQ } from "./constants";
+import { FAQ } from "./home/constants";
 
 /** Usein kysytyt kysymykset. */
 export function FaqSection() {
