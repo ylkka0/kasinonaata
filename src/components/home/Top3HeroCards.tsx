@@ -7,17 +7,22 @@ import type { Database } from "@/integrations/supabase/types";
 import { CURRENT_MONTH, CURRENT_YEAR } from "./constants";
 import { useLang, useT, pick } from "@/lib/i18n";
 
-type Casino = Database["public"]["Tables"]["casinos"]["Row"];
+type CasinoReview = Database["public"]["Tables"]["casino_reviews"]["Row"];
 
 /** Välitön CTA: TOP 3 kasinoa hero-osiossa, animoitu lista. */
 export function Top3HeroCards() {
   const { lang } = useLang();
   const t = useT();
-  const [selected, setSelected] = useState<Casino | null>(null);
+  const [selected, setSelected] = useState<CasinoReview | null>(null);
   const { data: casinos = [] } = useQuery({
     queryKey: ["casinos-top3"],
     queryFn: async () => {
-      const { data } = await supabase.from("casinos").select("*").order("ranking").limit(3);
+      const { data } = await supabase
+        .from("casino_reviews")
+        .select("*")
+        .eq("published", true)
+        .order("display_order", { ascending: true })
+        .limit(3);
       return data ?? [];
     },
   });
@@ -61,7 +66,7 @@ export function Top3HeroCards() {
                 {c.logo_url ? (
                   <img
                     src={c.logo_url}
-                    alt={c.logo_alt ?? c.name}
+                    alt={`${c.name} logo`}
                     className="w-14 h-14 md:w-16 md:h-16 rounded-lg object-contain bg-background/60 p-1"
                   />
                 ) : (
@@ -76,16 +81,16 @@ export function Top3HeroCards() {
                 <div className="flex items-center justify-between gap-2">
                   <div className="font-display text-lg md:text-xl text-white truncate">{c.name}</div>
                   <div className="inline-flex items-center gap-1 text-gold font-semibold shrink-0 text-sm">
-                    <span>★</span>
-                    <span>{Number(c.rating).toFixed(1)}</span>
+                    <span>{c.license_flag}</span>
+                    <span>{c.license_group.toUpperCase()}</span>
                   </div>
                 </div>
                 <div className="font-semibold text-foreground/95 truncate text-sm">
-                  {pick(lang, c.bonus_text, (c as any).bonus_text_en) ?? t("top3.defaultBonus")}
+                  {pick(lang, c.welcome_bonus, c.welcome_bonus_en) ?? t("top3.defaultBonus")}
                 </div>
-                {c.review_text && (
+                {c.withdrawals && (
                   <div className="text-xs text-muted-foreground truncate">
-                    {c.review_text.slice(0, 70)}
+                    {pick(lang, c.withdrawals, c.withdrawals_en)}
                   </div>
                 )}
               </div>
@@ -107,25 +112,25 @@ export function Top3HeroCards() {
               <DialogHeader>
                 <div className="flex items-center gap-3">
                   {selected.logo_url && (
-                    <img src={selected.logo_url} alt={selected.logo_alt ?? selected.name} className="w-14 h-14 rounded-lg object-contain bg-background/60 p-1" />
+                    <img src={selected.logo_url} alt={`${selected.name} logo`} className="w-14 h-14 rounded-lg object-contain bg-background/60 p-1" />
                   )}
                   <div className="min-w-0">
                     <DialogTitle className="font-display text-2xl text-white truncate">{selected.name}</DialogTitle>
-                    <div className="text-gold font-semibold text-sm">★ {Number(selected.rating).toFixed(1)} / 10</div>
+                    <div className="text-gold font-semibold text-sm">{selected.license_flag} {selected.license}</div>
                   </div>
                 </div>
               </DialogHeader>
 
-              {selected.bonus_text && (
+              {selected.welcome_bonus && (
                 <div className="bg-background/60 rounded-lg p-3">
                   <div className="text-[10px] uppercase tracking-widest text-gold">{t("top3.bonus")}</div>
-                  <div className="font-semibold text-foreground">{pick(lang, selected.bonus_text, (selected as any).bonus_text_en)}</div>
+                  <div className="font-semibold text-foreground">{pick(lang, selected.welcome_bonus, selected.welcome_bonus_en)}</div>
                 </div>
               )}
 
-              {selected.review_text && (
+              {selected.games && (
                 <DialogDescription className="text-sm text-foreground/85 leading-relaxed">
-                  {selected.review_text}
+                  {pick(lang, selected.games, selected.games_en)}
                 </DialogDescription>
               )}
 
@@ -150,19 +155,11 @@ export function Top3HeroCards() {
               )}
 
               <div className="flex gap-2 pt-2">
-                <a
-                  href={selected.affiliate_link ?? "#"}
-                  target="_blank"
-                  rel="nofollow sponsored noopener"
-                  className="flex-1 text-center px-4 py-2.5 text-sm rounded-lg font-bold uppercase tracking-wider bg-[color:var(--success)] text-background hover:opacity-90 transition-opacity"
-                >
-                  {t("top3.playNow")}
-                </a>
                 <Link
-                  to="/kasinot/$slug"
+                  to="/arvostelut/$slug"
                   params={{ slug: selected.slug }}
                   onClick={() => setSelected(null)}
-                  className="px-4 py-2.5 text-sm rounded-lg font-semibold uppercase tracking-wider border border-[color:var(--gold)]/40 text-gold hover:bg-surface-2"
+                  className="flex-1 text-center px-4 py-2.5 text-sm rounded-lg font-bold uppercase tracking-wider bg-[color:var(--success)] text-background hover:opacity-90 transition-opacity"
                 >
                   {t("top3.readReview")}
                 </Link>

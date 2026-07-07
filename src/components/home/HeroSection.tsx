@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Top3HeroCards } from "./Top3HeroCards";
-import heroFox from "@/assets/hero-fox.png.asset.json";
+import heroFox from "@/assets/hero-fox.png";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -13,7 +13,7 @@ export function HeroSection() {
     <section
       className="relative overflow-hidden border-b border-[color:var(--gold)]/20 bg-[#0D1B3E]"
       style={{
-        backgroundImage: `url(${heroFox.url})`,
+        backgroundImage: `url(${heroFox})`,
         backgroundSize: "cover",
         backgroundPosition: "center 25%",
       }}
