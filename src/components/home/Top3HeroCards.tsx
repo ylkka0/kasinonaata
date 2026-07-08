@@ -53,7 +53,7 @@ export function Top3HeroCards() {
             key={c.id}
             type="button"
             onClick={() => setSelected(c)}
-            className={`top3-card top3-card-${i + 1} group relative block w-full min-w-0 overflow-hidden text-left rounded-2xl border-2 backdrop-blur p-3.5 md:p-4 ${i === 0 ? "mt-4" : ""} ${rankStyles} hover:border-[color:var(--gold)] hover:gold-glow cursor-pointer`}
+            className={`top3-card top3-card-${i + 1} group relative block w-full min-w-0 text-left rounded-2xl border-2 backdrop-blur p-3.5 md:p-4 ${i === 0 ? "mt-4" : ""} ${rankStyles} hover:border-[color:var(--gold)] hover:gold-glow cursor-pointer`}
           >
             {i === 0 && (
               <div className="top3-crown absolute -top-5 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-[color:var(--gold)] to-[color:var(--gold-soft)] text-background shadow-[0_0_18px_color-mix(in_oklab,var(--gold)_85%,transparent)] border border-[color:var(--gold-soft)]">
