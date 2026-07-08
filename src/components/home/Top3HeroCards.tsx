@@ -154,15 +154,25 @@ export function Top3HeroCards() {
                 </div>
               )}
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex flex-col gap-2 pt-2">
                 <Link
                   to="/arvostelut/$slug"
                   params={{ slug: selected.slug }}
                   onClick={() => setSelected(null)}
-                  className="flex-1 text-center px-4 py-2.5 text-sm rounded-lg font-bold uppercase tracking-wider bg-[color:var(--success)] text-background hover:opacity-90 transition-opacity"
+                  className="text-center px-4 py-2.5 text-sm rounded-lg font-bold uppercase tracking-wider bg-[color:var(--success)] text-background hover:opacity-90 transition-opacity"
                 >
                   {t("top3.readReview")}
                 </Link>
+                {selected.affiliate_link && (
+                  <a
+                    href={selected.affiliate_link}
+                    target="_blank"
+                    rel="nofollow sponsored noopener"
+                    className="text-center px-4 py-2.5 text-sm rounded-lg font-bold uppercase tracking-wider gradient-gold text-background hover:opacity-90 transition-opacity"
+                  >
+                    Siirry verkkosivulle
+                  </a>
+                )}
               </div>
 
               <div className="text-[10px] text-muted-foreground/70 text-center pt-1">
