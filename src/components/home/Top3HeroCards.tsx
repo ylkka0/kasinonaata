@@ -28,9 +28,9 @@ export function Top3HeroCards() {
   });
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full min-w-0">
       <div className="mb-3 text-[11px] uppercase tracking-[0.25em] text-gold/80">
-        <span className="inline-flex items-center gap-2">
+        <span className="inline-flex min-w-0 items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--success)] animate-pulse" />
           {t("top3.kicker")} {CURRENT_YEAR} {CURRENT_MONTH.toUpperCase()}
         </span>
@@ -53,7 +53,7 @@ export function Top3HeroCards() {
             key={c.id}
             type="button"
             onClick={() => setSelected(c)}
-            className={`top3-card top3-card-${i + 1} group relative block w-full text-left rounded-2xl border-2 backdrop-blur p-3.5 md:p-4 ${i === 0 ? "mt-4" : ""} ${rankStyles} hover:border-[color:var(--gold)] hover:gold-glow cursor-pointer`}
+            className={`top3-card top3-card-${i + 1} group relative block w-full min-w-0 overflow-hidden text-left rounded-2xl border-2 backdrop-blur p-3.5 md:p-4 ${i === 0 ? "mt-4" : ""} ${rankStyles} hover:border-[color:var(--gold)] hover:gold-glow cursor-pointer`}
           >
             {i === 0 && (
               <div className="top3-crown absolute -top-5 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-[color:var(--gold)] to-[color:var(--gold-soft)] text-background shadow-[0_0_18px_color-mix(in_oklab,var(--gold)_85%,transparent)] border border-[color:var(--gold-soft)]">
@@ -61,7 +61,7 @@ export function Top3HeroCards() {
                 <span className="text-[10px] font-display tracking-[0.18em] uppercase">{t("top3.top1")}</span>
               </div>
             )}
-            <div className="flex items-center gap-3 md:gap-4 relative">
+            <div className="flex items-center gap-3 md:gap-4 relative min-w-0">
               <div className="relative shrink-0">
                 {c.logo_url ? (
                   <img
@@ -78,18 +78,18 @@ export function Top3HeroCards() {
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center justify-between gap-2 min-w-0">
                   <div className="font-display text-lg md:text-xl text-white truncate">{c.name}</div>
                   <div className="inline-flex items-center gap-1 text-gold font-semibold shrink-0 text-sm">
                     <span>{c.license_flag}</span>
                     <span>{c.license_group.toUpperCase()}</span>
                   </div>
                 </div>
-                <div className="font-semibold text-foreground/95 truncate text-sm">
+                <div className="font-semibold text-foreground/95 line-clamp-2 sm:truncate text-sm">
                   {pick(lang, c.welcome_bonus, c.welcome_bonus_en) ?? t("top3.defaultBonus")}
                 </div>
                 {c.withdrawals && (
-                  <div className="text-xs text-muted-foreground truncate">
+                  <div className="text-xs text-muted-foreground line-clamp-2 sm:truncate">
                     {pick(lang, c.withdrawals, c.withdrawals_en)}
                   </div>
                 )}

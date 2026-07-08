@@ -23,12 +23,12 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B3E]/80 via-transparent to-[#0D1B3E]/40 pointer-events-none" />
 
       <div className="container mx-auto px-4 py-10 md:py-20 relative">
-        <div className="grid lg:grid-cols-[1fr_minmax(0,380px)] gap-8 md:gap-12 items-center">
-          <div className="max-w-xl">
-            <h1 className="font-display text-3xl md:text-5xl leading-[1.05] text-white">
+        <div className="grid min-w-0 lg:grid-cols-[1fr_minmax(0,380px)] gap-8 md:gap-12 items-center">
+          <div className="max-w-xl min-w-0">
+            <h1 className="font-display text-[2rem] min-[390px]:text-3xl md:text-5xl leading-[1.05] text-white text-wrap">
               {t("hero.kicker")} <span className="text-gold">{t("hero.headline")}</span>
             </h1>
-            <p className="mt-5 text-base md:text-lg text-white/85">
+            <p className="mt-5 text-base md:text-lg text-white/85 break-words">
               {t("hero.lede")}
             </p>
             <div className="mt-6">
@@ -41,7 +41,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative min-w-0">
             <Top3HeroCards />
           </div>
         </div>
