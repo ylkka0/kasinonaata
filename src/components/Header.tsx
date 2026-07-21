@@ -1,17 +1,51 @@
 import { Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import logo from "@/assets/marten-logo.png";
-import { useSiteSetting, DEFAULT_HEADER, type HeaderSettings } from "@/lib/cms";
+import { PAYMENT_METHODS } from "@/components/home/constants";
+import { DEFAULT_HEADER, useSiteSetting, type HeaderGroup, type HeaderItem, type HeaderSettings } from "@/lib/cms";
+
+const paymentHrefByLabel = new Map(
+  PAYMENT_METHODS.map((method) => [method.name.toLowerCase(), `/maksutavat/${method.slug}`]),
+);
+
+function normalizeItem(groupLabel: string, item: HeaderItem): HeaderItem {
+  const group = groupLabel.toLowerCase();
+  const label = item.label.toLowerCase();
+
+  if (group === "uutiset") {
+    if (label === "uudet kasinot") return { ...item, href: "/uutiset/uudet-kasinot" };
+    if (label === "artikkelit") return { ...item, href: "/blogi" };
+  }
+
+  if (group === "maksutavat") {
+    const href = paymentHrefByLabel.get(label);
+    if (href) return { ...item, href };
+  }
+
+  return item;
+}
+
+function normalizeGroups(settings: HeaderSettings): HeaderGroup[] {
+  return (settings.groups ?? [])
+    .filter((group) => group.href !== "/oppaat" && group.href !== "/uutiset/alan-paivitykset")
+    .map((group) => {
+      if (group.label.toLowerCase() === "arvostelut") {
+        return { label: group.label, href: "/arvostelut" };
+      }
+
+      const items = group.items
+        ?.filter((item) => !["/oppaat", "/uutiset/alan-paivitykset"].includes(item.href))
+        .map((item) => normalizeItem(group.label, item));
+
+      return { ...group, items };
+    })
+    .filter((group) => group.href || (group.items && group.items.length > 0));
+}
 
 export function Header() {
   const settings = useSiteSetting<HeaderSettings>("header", DEFAULT_HEADER);
-  const groups = (settings.groups ?? [])
-    .map((group) => ({
-      ...group,
-      items: group.items?.filter((item) => !["/oppaat", "/uutiset/alan-paivitykset"].includes(item.href)),
-    }))
-    .filter((group) => group.href !== "/oppaat" && group.href !== "/uutiset/alan-paivitykset" && (!group.items || group.items.length > 0));
+  const groups = normalizeGroups(settings);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -41,6 +75,7 @@ export function Header() {
             </div>
           </div>
         </Link>
+
         <nav ref={navRef} className="hidden lg:flex items-center gap-1">
           {groups.map((g, i) =>
             g.items ? (
@@ -81,31 +116,17 @@ export function Header() {
             )
           )}
         </nav>
+
         <div className="flex items-center gap-2">
-          <button
-            className="lg:hidden p-2 text-gold"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Avaa valikko"
-          >
+          <button className="lg:hidden p-2 text-gold" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Avaa valikko">
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
+
       {mobileOpen && (
         <div className="lg:hidden border-t border-[color:var(--gold)]/20 bg-background/95">
           <div className="container mx-auto px-4 py-4 space-y-2 max-h-[80vh] overflow-y-auto">
-            <div className="flex gap-2 mb-2">
-              <button
-                type="button"
-                onClick={() => setLang("fi")}
-                className={`flex-1 px-2 py-1 text-[11px] font-bold tracking-wider rounded border ${lang === "fi" ? "bg-[color:var(--gold)] text-background border-[color:var(--gold)]" : "border-[color:var(--gold)]/30 text-foreground/80"}`}
-              >FI · Suomeksi</button>
-              <button
-                type="button"
-                onClick={() => setLang("en")}
-                className={`flex-1 px-2 py-1 text-[11px] font-bold tracking-wider rounded border ${lang === "en" ? "bg-[color:var(--gold)] text-background border-[color:var(--gold)]" : "border-[color:var(--gold)]/30 text-foreground/80"}`}
-              >EN · English</button>
-            </div>
             {groups.map((g) => (
               <div key={g.label}>
                 {g.items ? (
@@ -123,11 +144,7 @@ export function Header() {
                     </div>
                   </details>
                 ) : (
-                  <a
-                    href={g.href!}
-                    onClick={() => setMobileOpen(false)}
-                    className="block py-2 font-semibold uppercase tracking-wider text-sm text-foreground/85"
-                  >
+                  <a href={g.href!} onClick={() => setMobileOpen(false)} className="block py-2 font-semibold uppercase tracking-wider text-sm text-foreground/85">
                     {g.label}
                   </a>
                 )}

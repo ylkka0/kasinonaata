@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/blogi")({
 
 function BlogList() {
   const { lang } = useLang();
+  const { pathname } = useLocation();
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["blog-posts"],
     queryFn: async () => {
@@ -29,6 +30,8 @@ function BlogList() {
       return data ?? [];
     },
   });
+
+  if (pathname !== "/blogi") return <Outlet />;
 
   return (
     <Layout>

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
  */
 function Index() {
   return (
-    <Layout>
+    <Layout showFaq>
       <StructuredData />
       <HeroSection />
       <CasinoTicker />

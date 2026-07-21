@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
@@ -7,23 +7,15 @@ import { CmsExtra } from "@/components/CmsExtra";
 export const Route = createFileRoute("/arvostelut")({
   head: () => ({
     meta: [
-      { title: "Kasinoarvostelut lisensseittäin – Kasinonäätä" },
+      { title: "Kasinoarvostelut – Kasinonäätä" },
       {
         name: "description",
-        content:
-          "Näädän testaamien kasinoiden arvostelut jaoteltuna lisenssin mukaan: MGA, EMTA, Curaçao ja Anjouan.",
+        content: "Kaikki Näädän testaamat kasinoarvostelut yhdessä listassa.",
       },
     ],
   }),
   component: ArvostelutPage,
 });
-
-const GROUPS: { id: string; flag: string; title: string; blurb: string }[] = [
-  { id: "mga", flag: "🇲🇹", title: "MGA-lisensoidut", blurb: "Malta Gaming Authority — verovapaat voitot, tiukka valvonta." },
-  { id: "emta", flag: "🇪🇪", title: "EMTA-lisensoidut", blurb: "Viron Maksu- ja Tulliviranomainen — verovapaat voitot suomalaisille." },
-  { id: "curacao", flag: "🇨🇼", title: "Curaçao-lisensoidut", blurb: "Curaçao GCB — huom: voitot ovat verotettavia suomalaisille pelaajille." },
-  { id: "anjouan", flag: "🏝️", title: "Anjouan-lisensoidut", blurb: "Anjouan-lisenssi — voitot verotettavia suomalaisille pelaajille." },
-];
 
 type ReviewRow = {
   slug: string;
@@ -54,6 +46,7 @@ function CasinoCard({ row }: { row: ReviewRow }) {
 }
 
 function ArvostelutPage() {
+  const { pathname } = useLocation();
   const { data: rows = [] } = useQuery({
     queryKey: ["reviews-list"],
     queryFn: async () => {
@@ -66,7 +59,7 @@ function ArvostelutPage() {
     },
   });
 
-  const byGroup = (g: string) => rows.filter((r) => r.license_group === g);
+  if (pathname !== "/arvostelut") return <Outlet />;
 
   return (
     <Layout>
@@ -79,43 +72,19 @@ function ArvostelutPage() {
         </nav>
         <h1 className="font-display text-5xl mb-2">Kasinoarvostelut</h1>
         <p className="text-muted-foreground mb-10 max-w-3xl">
-          Näädän testaamat kasinot jaoteltuna lisenssin mukaan. Valitse kasino lukeaksesi
+          Kaikki Näädän testaamat kasinot samassa listassa. Valitse kasino lukeaksesi
           täydellisen arvostelun.
         </p>
 
-        <div className="flex flex-wrap gap-2 mb-10">
-          {GROUPS.map((s) => (
-            <a
-              key={s.id}
-              href={`#${s.id}`}
-              className="text-xs px-3 py-1.5 rounded-full border border-[color:var(--gold)]/40 text-gold hover:bg-surface-2"
-            >
-              {s.flag} {s.title} ({byGroup(s.id).length})
-            </a>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {rows.map((row) => (
+            <CasinoCard key={row.slug} row={row} />
           ))}
         </div>
 
-        <div className="space-y-14">
-          {GROUPS.map((s) => {
-            const items = byGroup(s.id);
-            if (items.length === 0) return null;
-            return (
-              <section key={s.id} id={s.id} className="scroll-mt-24">
-                <div className="mb-5">
-                  <h2 className="font-display text-3xl text-gold">
-                    {s.flag} {s.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">{s.blurb}</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {items.map((row) => (
-                    <CasinoCard key={row.slug} row={row} />
-                  ))}
-                </div>
-              </section>
-            );
-          })}
-        </div>
+        {rows.length === 0 && (
+          <p className="text-sm text-muted-foreground py-10">Ei julkaistuja arvosteluja.</p>
+        )}
       </section>
       <CmsExtra slug="arvostelut" />
     </Layout>
