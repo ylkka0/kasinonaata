@@ -34,18 +34,18 @@ type ReviewRow = {
 
 function CasinoCard({ row }: { row: ReviewRow }) {
   return (
-    <article className="bg-surface gold-border rounded-xl p-4 flex flex-col gap-3 hover:gold-glow transition-shadow">
-      <div className="h-20 flex items-center justify-center bg-background/40 rounded-lg border border-[color:var(--gold)]/10 p-2">
+    <article className="bg-surface gold-border rounded-xl p-6 flex flex-col gap-5 hover:gold-glow transition-shadow min-h-[280px]">
+      <div className="h-28 flex items-center justify-center bg-background/40 rounded-lg border border-[color:var(--gold)]/10 p-3">
         {row.logo_url ? (
           <img src={row.logo_url} alt={`${row.name} logo`} className="max-h-full max-w-full object-contain" loading="lazy" />
         ) : (
           <span className="text-xs text-muted-foreground">Ei logoa</span>
         )}
       </div>
-      <h3 className="font-display text-xl tracking-wide text-foreground">{row.name}</h3>
+      <h3 className="font-display text-2xl tracking-wide text-foreground">{row.name}</h3>
       <a
         href={`/arvostelut/${row.slug}`}
-        className="mt-auto text-center px-3 py-2 text-xs rounded-lg font-bold uppercase tracking-wider bg-[color:var(--success)] text-background hover:opacity-90 transition-opacity"
+        className="mt-auto text-center px-4 py-3 text-sm rounded-lg font-bold uppercase tracking-wider bg-[color:var(--success)] text-background hover:opacity-90 transition-opacity"
       >
         Lue arvostelu →
       </a>
@@ -107,7 +107,7 @@ function ArvostelutPage() {
                   </h2>
                   <p className="text-sm text-muted-foreground mt-1">{s.blurb}</p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {items.map((row) => (
                     <CasinoCard key={row.slug} row={row} />
                   ))}

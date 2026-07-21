@@ -12,7 +12,12 @@ import { useT } from "@/lib/i18n";
 export function Footer() {
   const f = useSiteSetting<FooterSettings>("footer", DEFAULT_FOOTER);
   const h = useSiteSetting<HeaderSettings>("header", DEFAULT_HEADER);
-  const headerGroups = h.groups ?? [];
+  const headerGroups = (h.groups ?? [])
+    .map((group) => ({
+      ...group,
+      items: group.items?.filter((item) => !["/oppaat", "/uutiset/alan-paivitykset"].includes(item.href)),
+    }))
+    .filter((group) => group.href !== "/oppaat" && group.href !== "/uutiset/alan-paivitykset" && (!group.items || group.items.length > 0));
   const t = useT();
   return (
     <footer className="mt-24 border-t border-[color:var(--gold)]/20 bg-surface">

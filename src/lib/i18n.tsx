@@ -2,8 +2,6 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export type Lang = "fi" | "en";
 
-const STORAGE_KEY = "site-lang";
-
 type Ctx = { lang: Lang; setLang: (l: Lang) => void };
 const LangContext = createContext<Ctx>({ lang: "fi", setLang: () => {} });
 
@@ -11,18 +9,12 @@ export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("fi");
 
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved === "en" || saved === "fi") setLangState(saved);
-    } catch {}
+    document.documentElement.lang = "fi";
   }, []);
 
-  const setLang = (l: Lang) => {
-    setLangState(l);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, l);
-      document.documentElement.lang = l;
-    } catch {}
+  const setLang = (_l: Lang) => {
+    setLangState("fi");
+    document.documentElement.lang = "fi";
   };
 
   useEffect(() => {
@@ -38,15 +30,11 @@ export function useLang() {
 
 /** Returns the EN value when language is EN and a non-empty EN value exists, otherwise FI. */
 export function pick<T extends string | null | undefined>(lang: Lang, fi: T, en: T): T {
-  if (lang === "en") {
-    if (en && String(en).trim().length > 0) return en;
-  }
   return fi;
 }
 
 /** Array variant for text[] columns: returns EN array if non-empty, otherwise FI. */
 export function pickArr<T>(lang: Lang, fi: T[] | null | undefined, en: T[] | null | undefined): T[] {
-  if (lang === "en" && en && en.length > 0) return en;
   return fi ?? [];
 }
 

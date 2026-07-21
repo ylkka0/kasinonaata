@@ -3,6 +3,7 @@ import { Layout } from "@/components/Layout";
 import { CURRENT_MONTH, CURRENT_YEAR } from "@/components/home/constants";
 import { HeroSection } from "@/components/home/HeroSection";
 import { CasinoTicker } from "@/components/home/CasinoTicker";
+import { AllCasinosSection } from "@/components/home/AllCasinosSection";
 import { NewsFeedSection } from "@/components/home/NewsFeedSection";
 import { ResponsibleGamingSection } from "@/components/home/ResponsibleGamingSection";
 import { MobileStickyBar } from "@/components/home/MobileStickyBar";
@@ -35,6 +36,7 @@ function Index() {
       <StructuredData />
       <HeroSection />
       <CasinoTicker />
+      <AllCasinosSection />
       <NewsFeedSection />
       <ResponsibleGamingSection />
       <MobileStickyBar />

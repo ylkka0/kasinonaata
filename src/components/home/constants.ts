@@ -29,14 +29,14 @@ export const CATEGORY_CARDS = [
 ] as const;
 
 export const PAYMENT_METHODS = [
-  { name: "Trustly", count: "23 kasinoa" },
-  { name: "Zimpler", count: "19 kasinoa" },
-  { name: "Brite", count: "17 kasinoa" },
-  { name: "Viljo", count: "12 kasinoa" },
-  { name: "Euteller", count: "8 kasinoa" },
-  { name: "Trumo", count: "6 kasinoa" },
-  { name: "Visa", count: "25 kasinoa" },
-  { name: "Krypto", count: "9 kasinoa" },
+  { name: "Trustly", slug: "trustly", count: "23 kasinoa" },
+  { name: "Zimpler", slug: "zimpler", count: "19 kasinoa" },
+  { name: "Brite", slug: "brite", count: "17 kasinoa" },
+  { name: "Viljo", slug: "viljo", count: "12 kasinoa" },
+  { name: "Euteller", slug: "euteller", count: "8 kasinoa" },
+  { name: "Trumo", slug: "trumo", count: "6 kasinoa" },
+  { name: "Visa", slug: "visa", count: "25 kasinoa" },
+  { name: "Krypto", slug: "krypto", count: "9 kasinoa" },
 ] as const;
 
 export const FAQ = [

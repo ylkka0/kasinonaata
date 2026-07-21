@@ -387,6 +387,8 @@ function DashboardPanel({ onNavigate }: { onNavigate: (t: Tab) => void }) {
   );
 }
 
+const CASINO_CATEGORIES = ["Pikakasino", "Uusi kasino", "Verovapaa", "Bonuskasino", "Kryptokasino"];
+
 function CasinosPanel() {
   const qc = useQueryClient();
   const { data: casinos = [] } = useQuery({
@@ -400,6 +402,7 @@ function CasinosPanel() {
     rating: 8,
     affiliate_link: "",
     ranking: 100,
+    category: "",
     tags: "",
     review_text: "",
     logo_url: "" as string | null,
@@ -426,10 +429,13 @@ function CasinosPanel() {
       rating: Number(form.rating),
       affiliate_link: form.affiliate_link,
       ranking: Number(form.ranking),
-      tags: form.tags
+      tags: [
+        ...(form.category ? [form.category] : []),
+        ...form.tags
         .split(",")
         .map((s) => s.trim())
-        .filter(Boolean),
+        .filter((tag) => tag && !CASINO_CATEGORIES.includes(tag)),
+      ],
       review_text: form.review_text,
       logo_url: form.logo_url,
       pros: form.pros,
@@ -485,7 +491,7 @@ function CasinosPanel() {
         <h2 className="md:col-span-2 font-display text-2xl text-gold">
           {editing ? "Muokkaa kasinoa" : "Lisää uusi kasino"}
         </h2>
-        <div className="md:col-span-2 flex gap-2 text-sm">
+        <div className="hidden md:col-span-2 flex gap-2 text-sm">
           <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
           <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
         </div>
@@ -506,6 +512,14 @@ function CasinosPanel() {
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           required
         />
+        <select
+          className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
+          value={form.category}
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
+        >
+          <option value="">Valitse pääkategoria</option>
+          {CASINO_CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}
+        </select>
         <input
           className="bg-background border border-[color:var(--gold)]/30 rounded px-3 py-2"
           placeholder="Slug (esim. lucky-spins)"
@@ -682,7 +696,8 @@ function CasinosPanel() {
                     rating: Number(c.rating),
                     affiliate_link: c.affiliate_link ?? "",
                     ranking: c.ranking,
-                    tags: (c.tags ?? []).join(", "),
+                    category: (c.tags ?? []).find((tag) => CASINO_CATEGORIES.includes(tag)) ?? "",
+                    tags: (c.tags ?? []).filter((tag) => !CASINO_CATEGORIES.includes(tag)).join(", "),
                     review_text: c.review_text ?? "",
                     logo_url: c.logo_url ?? null,
                     pros: c.pros ?? [],
@@ -814,7 +829,7 @@ function BlogPanel() {
         <h2 className="md:col-span-2 font-display text-2xl text-gold">
           {editing ? "Muokkaa artikkelia" : "Uusi blogiartikkeli"}
         </h2>
-        <div className="md:col-span-2 flex gap-1 text-xs">
+        <div className="hidden md:col-span-2 flex gap-1 text-xs">
           <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
           <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
         </div>
@@ -1218,10 +1233,11 @@ function PagesPanel() {
   const [newPage, setNewPage] = useState({ slug: "", title: "" });
 
   const PAGE_GROUPS: { label: string; slugs: string[] }[] = [
-    { label: "Päävalikko", slugs: ["etusivu", "kasinot", "uutiset", "arvostelut", "maksutavat", "lisenssit", "oppaat", "toimitus"] },
-    { label: "Uutiset – alasivut", slugs: ["uutiset-uudet-kasinot", "uutiset-alan-paivitykset"] },
+    { label: "Päävalikko", slugs: ["etusivu", "kasinot", "uutiset", "arvostelut", "maksutavat", "lisenssit", "toimitus"] },
+    { label: "Uutiset – alasivut", slugs: ["uutiset-uudet-kasinot"] },
     { label: "Arvostelut – alasivut", slugs: ["pikakasinot", "kotiutusnopeus"] },
-    { label: "Oppaat – alasivut", slugs: ["bonukset", "kolikkopelit"] },
+    { label: "Muut sisältösivut", slugs: ["bonukset", "kolikkopelit"] },
+    { label: "Maksutavat", slugs: ["maksutapa-trustly", "maksutapa-zimpler", "maksutapa-brite", "maksutapa-viljo", "maksutapa-euteller", "maksutapa-trumo", "maksutapa-visa", "maksutapa-krypto"] },
     { label: "Blogi & Kirjoittajat", slugs: ["blogi", "kirjoittajat"] },
     { label: "Muut sivut", slugs: ["valitukset"] },
   ];
@@ -1233,10 +1249,16 @@ function PagesPanel() {
     arvostelut: "Arvostelut",
     maksutavat: "Maksutavat",
     lisenssit: "Lisenssit",
-    oppaat: "Oppaat",
     toimitus: "Toimitus",
     "uutiset-uudet-kasinot": "Uudet kasinot",
-    "uutiset-alan-paivitykset": "Alan päivitykset",
+    "maksutapa-trustly": "Trustly-kasinot",
+    "maksutapa-zimpler": "Zimpler-kasinot",
+    "maksutapa-brite": "Brite-kasinot",
+    "maksutapa-viljo": "Viljo-kasinot",
+    "maksutapa-euteller": "Euteller-kasinot",
+    "maksutapa-trumo": "Trumo-kasinot",
+    "maksutapa-visa": "Visa-kasinot",
+    "maksutapa-krypto": "Kryptokasinot",
     pikakasinot: "Pikakasinot",
     kotiutusnopeus: "Kotiutusnopeus",
     bonukset: "Bonukset",
@@ -1249,7 +1271,14 @@ function PagesPanel() {
   const ROUTE_FOR_SLUG: Record<string, string> = {
     etusivu: "/",
     "uutiset-uudet-kasinot": "/uutiset/uudet-kasinot",
-    "uutiset-alan-paivitykset": "/uutiset/alan-paivitykset",
+    "maksutapa-trustly": "/maksutavat/trustly",
+    "maksutapa-zimpler": "/maksutavat/zimpler",
+    "maksutapa-brite": "/maksutavat/brite",
+    "maksutapa-viljo": "/maksutavat/viljo",
+    "maksutapa-euteller": "/maksutavat/euteller",
+    "maksutapa-trumo": "/maksutavat/trumo",
+    "maksutapa-visa": "/maksutavat/visa",
+    "maksutapa-krypto": "/maksutavat/krypto",
   };
 
   const openOrCreate = async (slug: string) => {
@@ -1320,7 +1349,7 @@ function PagesPanel() {
           ← Takaisin
         </button>
         <div className="bg-surface gold-border rounded-xl p-5 space-y-4">
-          <div className="flex gap-1 text-xs">
+          <div className="hidden flex gap-1 text-xs">
             <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
             <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
           </div>
@@ -2098,7 +2127,7 @@ function ReviewsPanel() {
         <h2 className="md:col-span-2 font-display text-2xl text-gold">
           {editing ? `Muokkaa arvostelua: ${form.name}` : "Lisää uusi arvostelu"}
         </h2>
-        <div className="md:col-span-2 flex gap-1 text-xs">
+        <div className="hidden md:col-span-2 flex gap-1 text-xs">
           <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
           <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
         </div>
@@ -2324,7 +2353,7 @@ function AuthorsPanel() {
         <h2 className="md:col-span-2 font-display text-2xl text-gold">
           {editing ? "Muokkaa kirjoittajaa" : "Uusi kirjoittaja"}
         </h2>
-        <div className="md:col-span-2 flex gap-2 text-sm">
+        <div className="hidden md:col-span-2 flex gap-2 text-sm">
           <button type="button" onClick={() => setLang("fi")} className={`px-3 py-1.5 rounded ${lang === "fi" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇫🇮 Suomi</button>
           <button type="button" onClick={() => setLang("en")} className={`px-3 py-1.5 rounded ${lang === "en" ? "bg-[color:var(--gold)] text-background font-bold" : "border border-[color:var(--gold)]/30"}`}>🇬🇧 English (valinnainen)</button>
         </div>

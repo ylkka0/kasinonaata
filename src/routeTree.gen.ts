@@ -14,7 +14,6 @@ import { Route as UutisetRouteImport } from './routes/uutiset'
 import { Route as ToimitusRouteImport } from './routes/toimitus'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PikakasinotRouteImport } from './routes/pikakasinot'
-import { Route as OppaatRouteImport } from './routes/oppaat'
 import { Route as MaksutavatRouteImport } from './routes/maksutavat'
 import { Route as LisenssitRouteImport } from './routes/lisenssit'
 import { Route as KotiutusnopeusRouteImport } from './routes/kotiutusnopeus'
@@ -27,7 +26,7 @@ import { Route as ArvostelutRouteImport } from './routes/arvostelut'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UutisetUudetKasinotRouteImport } from './routes/uutiset.uudet-kasinot'
-import { Route as UutisetAlanPaivityksetRouteImport } from './routes/uutiset.alan-paivitykset'
+import { Route as MaksutavatSlugRouteImport } from './routes/maksutavat.$slug'
 import { Route as KasinotSlugRouteImport } from './routes/kasinot.$slug'
 import { Route as BlogiSlugRouteImport } from './routes/blogi.$slug'
 import { Route as ArvostelutSlugRouteImport } from './routes/arvostelut.$slug'
@@ -55,11 +54,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PikakasinotRoute = PikakasinotRouteImport.update({
   id: '/pikakasinot',
   path: '/pikakasinot',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OppaatRoute = OppaatRouteImport.update({
-  id: '/oppaat',
-  path: '/oppaat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MaksutavatRoute = MaksutavatRouteImport.update({
@@ -122,10 +116,10 @@ const UutisetUudetKasinotRoute = UutisetUudetKasinotRouteImport.update({
   path: '/uudet-kasinot',
   getParentRoute: () => UutisetRoute,
 } as any)
-const UutisetAlanPaivityksetRoute = UutisetAlanPaivityksetRouteImport.update({
-  id: '/alan-paivitykset',
-  path: '/alan-paivitykset',
-  getParentRoute: () => UutisetRoute,
+const MaksutavatSlugRoute = MaksutavatSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => MaksutavatRoute,
 } as any)
 const KasinotSlugRoute = KasinotSlugRouteImport.update({
   id: '/$slug',
@@ -154,8 +148,7 @@ export interface FileRoutesByFullPath {
   '/kolikkopelit': typeof KolikkopelitRoute
   '/kotiutusnopeus': typeof KotiutusnopeusRoute
   '/lisenssit': typeof LisenssitRoute
-  '/maksutavat': typeof MaksutavatRoute
-  '/oppaat': typeof OppaatRoute
+  '/maksutavat': typeof MaksutavatRouteWithChildren
   '/pikakasinot': typeof PikakasinotRoute
   '/reset-password': typeof ResetPasswordRoute
   '/toimitus': typeof ToimitusRoute
@@ -164,7 +157,7 @@ export interface FileRoutesByFullPath {
   '/arvostelut/$slug': typeof ArvostelutSlugRoute
   '/blogi/$slug': typeof BlogiSlugRoute
   '/kasinot/$slug': typeof KasinotSlugRoute
-  '/uutiset/alan-paivitykset': typeof UutisetAlanPaivityksetRoute
+  '/maksutavat/$slug': typeof MaksutavatSlugRoute
   '/uutiset/uudet-kasinot': typeof UutisetUudetKasinotRoute
 }
 export interface FileRoutesByTo {
@@ -178,8 +171,7 @@ export interface FileRoutesByTo {
   '/kolikkopelit': typeof KolikkopelitRoute
   '/kotiutusnopeus': typeof KotiutusnopeusRoute
   '/lisenssit': typeof LisenssitRoute
-  '/maksutavat': typeof MaksutavatRoute
-  '/oppaat': typeof OppaatRoute
+  '/maksutavat': typeof MaksutavatRouteWithChildren
   '/pikakasinot': typeof PikakasinotRoute
   '/reset-password': typeof ResetPasswordRoute
   '/toimitus': typeof ToimitusRoute
@@ -188,7 +180,7 @@ export interface FileRoutesByTo {
   '/arvostelut/$slug': typeof ArvostelutSlugRoute
   '/blogi/$slug': typeof BlogiSlugRoute
   '/kasinot/$slug': typeof KasinotSlugRoute
-  '/uutiset/alan-paivitykset': typeof UutisetAlanPaivityksetRoute
+  '/maksutavat/$slug': typeof MaksutavatSlugRoute
   '/uutiset/uudet-kasinot': typeof UutisetUudetKasinotRoute
 }
 export interface FileRoutesById {
@@ -203,8 +195,7 @@ export interface FileRoutesById {
   '/kolikkopelit': typeof KolikkopelitRoute
   '/kotiutusnopeus': typeof KotiutusnopeusRoute
   '/lisenssit': typeof LisenssitRoute
-  '/maksutavat': typeof MaksutavatRoute
-  '/oppaat': typeof OppaatRoute
+  '/maksutavat': typeof MaksutavatRouteWithChildren
   '/pikakasinot': typeof PikakasinotRoute
   '/reset-password': typeof ResetPasswordRoute
   '/toimitus': typeof ToimitusRoute
@@ -213,7 +204,7 @@ export interface FileRoutesById {
   '/arvostelut/$slug': typeof ArvostelutSlugRoute
   '/blogi/$slug': typeof BlogiSlugRoute
   '/kasinot/$slug': typeof KasinotSlugRoute
-  '/uutiset/alan-paivitykset': typeof UutisetAlanPaivityksetRoute
+  '/maksutavat/$slug': typeof MaksutavatSlugRoute
   '/uutiset/uudet-kasinot': typeof UutisetUudetKasinotRoute
 }
 export interface FileRouteTypes {
@@ -230,7 +221,6 @@ export interface FileRouteTypes {
     | '/kotiutusnopeus'
     | '/lisenssit'
     | '/maksutavat'
-    | '/oppaat'
     | '/pikakasinot'
     | '/reset-password'
     | '/toimitus'
@@ -239,7 +229,7 @@ export interface FileRouteTypes {
     | '/arvostelut/$slug'
     | '/blogi/$slug'
     | '/kasinot/$slug'
-    | '/uutiset/alan-paivitykset'
+    | '/maksutavat/$slug'
     | '/uutiset/uudet-kasinot'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -254,7 +244,6 @@ export interface FileRouteTypes {
     | '/kotiutusnopeus'
     | '/lisenssit'
     | '/maksutavat'
-    | '/oppaat'
     | '/pikakasinot'
     | '/reset-password'
     | '/toimitus'
@@ -263,7 +252,7 @@ export interface FileRouteTypes {
     | '/arvostelut/$slug'
     | '/blogi/$slug'
     | '/kasinot/$slug'
-    | '/uutiset/alan-paivitykset'
+    | '/maksutavat/$slug'
     | '/uutiset/uudet-kasinot'
   id:
     | '__root__'
@@ -278,7 +267,6 @@ export interface FileRouteTypes {
     | '/kotiutusnopeus'
     | '/lisenssit'
     | '/maksutavat'
-    | '/oppaat'
     | '/pikakasinot'
     | '/reset-password'
     | '/toimitus'
@@ -287,7 +275,7 @@ export interface FileRouteTypes {
     | '/arvostelut/$slug'
     | '/blogi/$slug'
     | '/kasinot/$slug'
-    | '/uutiset/alan-paivitykset'
+    | '/maksutavat/$slug'
     | '/uutiset/uudet-kasinot'
   fileRoutesById: FileRoutesById
 }
@@ -302,8 +290,7 @@ export interface RootRouteChildren {
   KolikkopelitRoute: typeof KolikkopelitRoute
   KotiutusnopeusRoute: typeof KotiutusnopeusRoute
   LisenssitRoute: typeof LisenssitRoute
-  MaksutavatRoute: typeof MaksutavatRoute
-  OppaatRoute: typeof OppaatRoute
+  MaksutavatRoute: typeof MaksutavatRouteWithChildren
   PikakasinotRoute: typeof PikakasinotRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ToimitusRoute: typeof ToimitusRoute
@@ -346,13 +333,6 @@ declare module '@tanstack/react-router' {
       path: '/pikakasinot'
       fullPath: '/pikakasinot'
       preLoaderRoute: typeof PikakasinotRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/oppaat': {
-      id: '/oppaat'
-      path: '/oppaat'
-      fullPath: '/oppaat'
-      preLoaderRoute: typeof OppaatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/maksutavat': {
@@ -439,12 +419,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UutisetUudetKasinotRouteImport
       parentRoute: typeof UutisetRoute
     }
-    '/uutiset/alan-paivitykset': {
-      id: '/uutiset/alan-paivitykset'
-      path: '/alan-paivitykset'
-      fullPath: '/uutiset/alan-paivitykset'
-      preLoaderRoute: typeof UutisetAlanPaivityksetRouteImport
-      parentRoute: typeof UutisetRoute
+    '/maksutavat/$slug': {
+      id: '/maksutavat/$slug'
+      path: '/$slug'
+      fullPath: '/maksutavat/$slug'
+      preLoaderRoute: typeof MaksutavatSlugRouteImport
+      parentRoute: typeof MaksutavatRoute
     }
     '/kasinot/$slug': {
       id: '/kasinot/$slug'
@@ -503,13 +483,23 @@ const KasinotRouteChildren: KasinotRouteChildren = {
 const KasinotRouteWithChildren =
   KasinotRoute._addFileChildren(KasinotRouteChildren)
 
+interface MaksutavatRouteChildren {
+  MaksutavatSlugRoute: typeof MaksutavatSlugRoute
+}
+
+const MaksutavatRouteChildren: MaksutavatRouteChildren = {
+  MaksutavatSlugRoute: MaksutavatSlugRoute,
+}
+
+const MaksutavatRouteWithChildren = MaksutavatRoute._addFileChildren(
+  MaksutavatRouteChildren,
+)
+
 interface UutisetRouteChildren {
-  UutisetAlanPaivityksetRoute: typeof UutisetAlanPaivityksetRoute
   UutisetUudetKasinotRoute: typeof UutisetUudetKasinotRoute
 }
 
 const UutisetRouteChildren: UutisetRouteChildren = {
-  UutisetAlanPaivityksetRoute: UutisetAlanPaivityksetRoute,
   UutisetUudetKasinotRoute: UutisetUudetKasinotRoute,
 }
 
@@ -527,8 +517,7 @@ const rootRouteChildren: RootRouteChildren = {
   KolikkopelitRoute: KolikkopelitRoute,
   KotiutusnopeusRoute: KotiutusnopeusRoute,
   LisenssitRoute: LisenssitRoute,
-  MaksutavatRoute: MaksutavatRoute,
-  OppaatRoute: OppaatRoute,
+  MaksutavatRoute: MaksutavatRouteWithChildren,
   PikakasinotRoute: PikakasinotRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ToimitusRoute: ToimitusRoute,
@@ -538,3 +527,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
