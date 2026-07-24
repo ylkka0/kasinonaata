@@ -77,7 +77,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 function RootComponent() {
   if (MAINTENANCE_MODE) {
